@@ -207,6 +207,32 @@
             padding: 3px;
         }
 
+        .shuffle-toggle {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            background: #F1F5F9;
+            border-radius: var(--radius-sm);
+            padding: 5px 10px;
+            transition: var(--transition);
+            user-select: none;
+        }
+
+        .shuffle-toggle input {
+            accent-color: var(--primary);
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+
+        .shuffle-toggle:hover {
+            background: #E2E8F0;
+        }
+
         .mode-btn {
             padding: 6px 14px;
             border: none;
@@ -678,12 +704,158 @@
             font-size: 0.82rem;
         }
 
+        /* ===== Mobile Hamburger ===== */
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .hamburger-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        /* ===== Sidebar Overlay ===== */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 998;
+            animation: fadeIn 0.2s ease;
+        }
+        .sidebar-overlay.show { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         /* ===== Responsive ===== */
         @media (max-width: 768px) {
-            .sidebar { width: 220px; }
-            .content-area { padding: 16px; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .welcome-cards { grid-template-columns: 1fr; }
+            .hamburger-btn { display: flex; align-items: center; }
+
+            .sidebar {
+                position: fixed;
+                left: -300px;
+                top: 0;
+                bottom: 0;
+                z-index: 999;
+                width: 280px;
+                transition: left 0.3s ease;
+                box-shadow: none;
+            }
+            .sidebar.open {
+                left: 0;
+                box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+            }
+
+            .main {
+                width: 100%;
+            }
+
+            .topbar {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .topbar-left {
+                flex: 1;
+                min-width: 0;
+            }
+            .topbar-left h2 { font-size: 1rem; }
+            .topbar-left p { font-size: 0.72rem; }
+
+            .topbar-right {
+                flex-wrap: wrap;
+                gap: 8px;
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .stats-bar { gap: 10px; }
+            .stat-item { font-size: 0.75rem; }
+
+            .content-area {
+                padding: 16px 12px;
+            }
+
+            .welcome {
+                padding: 24px 12px;
+            }
+            .welcome-icon { font-size: 2.8rem; margin-bottom: 12px; }
+            .welcome h2 { font-size: 1.3rem; }
+            .welcome p { font-size: 0.85rem; margin-bottom: 16px; }
+
+            .welcome-cards {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .welcome-card { padding: 18px 16px; }
+
+            .question-card { margin-bottom: 12px; }
+            .q-header { padding: 12px 14px 10px; }
+            .q-body { padding: 12px 14px; }
+            .option-item {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+                gap: 8px;
+            }
+            .option-letter { width: 22px; height: 22px; font-size: 0.7rem; }
+            .feedback-area { margin: 0 14px 12px; padding: 10px 12px; font-size: 0.82rem; }
+
+            .exam-header {
+                padding: 16px 18px;
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            .exam-timer { font-size: 1.4rem; }
+
+            .submit-btn { padding: 12px 32px; font-size: 0.9rem; }
+
+            .result-page { padding: 24px 12px; }
+            .result-score { width: 120px; height: 120px; }
+            .result-score .score-num { font-size: 2.2rem; }
+            .result-details { gap: 16px; flex-wrap: wrap; }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .stats-card { padding: 16px; }
+            .stats-card .sc-value { font-size: 1.4rem; }
+
+            .ust-row {
+                padding: 10px 14px;
+                font-size: 0.8rem;
+            }
+            .ust-bar { width: 60px; margin: 0 10px; }
+
+            .chapter-actions {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .topbar-right {
+                gap: 6px;
+            }
+            .mode-btn { padding: 5px 10px; font-size: 0.75rem; }
+            .shuffle-toggle { padding: 4px 8px; font-size: 0.75rem; }
+            .stats-bar { gap: 6px; }
+
+            .option-item { padding: 8px 10px; font-size: 0.82rem; }
+
+            .exam-header { padding: 14px; }
+            .exam-header h3 { font-size: 0.95rem; }
         }
 
         /* ===== Scrollbar for sidebar ===== */
@@ -761,6 +933,85 @@
         }
 
         /* ===== Chapter Actions Bar ===== */
+        .section-c-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+        }
+
+        .sc-toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .sc-passage {
+            font-size: 1rem;
+            line-height: 2;
+            color: var(--text);
+        }
+
+        .sc-blank {
+            display: inline;
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--primary);
+            padding: 1px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .sc-blank:hover {
+            background: rgba(99, 102, 241, 0.22);
+        }
+
+        .sc-blank.revealed {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--success);
+            border-bottom-color: var(--success);
+        }
+
+        .sc-blank-trans {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-left: 2px;
+        }
+
+        .sc-answer-list {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sc-answer-item {
+            padding: 6px 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .sc-answer-num {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            margin-right: 8px;
+        }
+
+        .sc-answer-trans {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            margin-left: 4px;
+        }
+
+        /* ===== Chapter Actions Bar ===== */
         .chapter-actions {
             display: flex;
             align-items: center;
@@ -802,14 +1053,15 @@
 </head>
 <body>
 
-<div class="sidebar">
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <h1>English Review</h1>
-        <p>英语听力复习系统 · 6 Units</p>
+        <p>英语听力复习</p>
     </div>
     <div class="sidebar-actions">
         <button class="action-btn primary" onclick="startMockExam()">📝 模拟试卷</button>
-        <button class="action-btn secondary" onclick="startRandomQuiz()">🎲 随机练习 (10题)</button>
+        <button class="action-btn secondary" onclick="startRandomQuiz()">🎲 随机练习 (20题)</button>
         <button class="action-btn success" onclick="showStats()">📊 学习统计</button>
         <button class="action-btn warning" onclick="showWelcome()">🏠 首页</button>
     </div>
@@ -819,10 +1071,17 @@
 <div class="main">
     <div class="topbar">
         <div class="topbar-left">
-            <h2 id="topbar-title">英语听力复习系统</h2>
+            <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="菜单">
+                <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <h2 id="topbar-title">英语听力复习</h2>
             <p id="topbar-subtitle">选择章节或开始练习</p>
         </div>
         <div class="topbar-right">
+            <label class="shuffle-toggle" title="模拟卷/随机练习时打乱选项顺序">
+                <input type="checkbox" id="shuffle-toggle-input" onchange="toggleShuffleOptions(this.checked)" checked>
+                <span>乱序</span>
+            </label>
             <div class="mode-toggle" id="mode-toggle">
                 <button class="mode-btn active" onclick="setMode('quiz')" id="mode-quiz">答题</button>
                 <button class="mode-btn" onclick="setMode('study')" id="mode-study">学习</button>
@@ -867,20 +1126,21 @@ const BANK = {
 {a:0, o:["A. It is a rare phenomenon.","B. It is quite common nowadays.","C. It is an extremely strange thing to do.","D. It is absolutely unnecessary."], t:["这是一种罕见的现象。","如今这很常见。","这是一件极其奇怪的事。","这完全没必要。"]},
 {a:3, o:["A. The passage doesn't mention it.","B. They would most likely lose money.","C. They would be highly profitable.","D. They are well planned."], t:["文章没有提到。","他们很可能会亏钱。","他们会非常有利可图。","它们规划得很好。"]}
 ],
-"Follow up - 第一组": [
+"Follow up - 第一套": [
 {a:1, o:["A. He has only one hobby and no bad hobbies.","B. He thinks he can learn skills from good hobbies.","C. He has both bad hobbies and good ones.","D. He thinks one can turn bad hobbies into good ones."], t:["他只有一个爱好，没有不良爱好。","他认为可以从好的爱好中学到技能。","他既有不良爱好也有好的爱好。","他认为人可以把不良爱好变成好的爱好。"]},
 {a:2, o:["A. Stephen is good at taking account of everything.","B. Stephen's babies are interested in collecting coins.","C. Stephen learns to be systematic from his hobby.","D. Stephen collects coins because they are valuable."], t:["斯蒂芬善于把每件事都考虑在内。","斯蒂芬的孩子们对收集硬币感兴趣。","斯蒂芬从他的爱好中学会了有条理。","斯蒂芬收集硬币是因为它们有价值。"]},
 {a:3, o:["A. Roy often empties his bag when he returns home.","B. Roy is trying to persuade Carol to go fishing with him.","C. Roy is only interested in catching fish.","D. Roy's real interest in fishing is sitting alone and doing nothing."], t:["罗伊回家时经常清空他的包。","罗伊正试图说服卡罗尔和他一起去钓鱼。","罗伊只对钓鱼感兴趣。","罗伊钓鱼的真正兴趣是独自坐着什么都不做。"]},
 {a:1, o:["A. The farmer makes robots without much knowledge about high-tech.","B. The farmer has held on to his hobby even though he met with great difficulties.","C. The farmer's hobby has brought great changes to his village.","D. The farmer started his hobby at the age of 44."], t:["这个农民没有多少高科技知识就制造了机器人。","这个农民尽管遇到了很大的困难，仍然坚持他的爱好。","这个农民的爱好给他的村庄带来了巨大的变化。","这个农民在44岁时开始了他的爱好。"]},
 {a:3, o:["A. She thinks drug addiction is the most dangerous.","B. She thinks Internet addiction is the most harmful.","C. She thinks addictions that make you trash are the worst.","D. She thinks every addiction is as bad as the other."], t:["她认为毒瘾是最危险的。","她认为网瘾是最有害的。","她认为让人变得颓废的瘾是最糟糕的。","她认为每种瘾都一样糟糕。"]}
 ],
-"Follow up - 第二组": [
+"Follow up - 第二套": [
 {a:3, o:["A. Mark is a poker addict.","B. Mark is obsessed with online gambling.","C. Mark is fond of making friends on the Internet.","D. Mark is addicted to online games."], t:["马克是个扑克迷。","马克沉迷于网络赌博。","马克喜欢在网上交朋友。","马克沉迷于网络游戏。"]},
 {a:2, o:["A. Ron doesn't like any games.","B. Ron thinks it's OK to play games for money.","C. Ron is not a serious gaming addict.","D. Ron loves online poker games."], t:["罗恩不喜欢任何游戏。","罗恩认为玩游戏赌钱是可以的。","罗恩不是一个严重的游戏瘾者。","罗恩喜欢在线扑克游戏。"]},
 {a:2, o:["A. Gloria thinks it's no big deal for Mark to be addicted to games.","B. Gloria is afraid that Mark will get addicted to online gambling.","C. Gloria hopes Mark can control himself playing games.","D. Gloria wishes Mark can learn more from the games he plays."], t:["格洛丽亚认为马克沉迷游戏没什么大不了的。","格洛丽亚担心马克会沉迷于网络赌博。","格洛丽亚希望马克能控制自己玩游戏。","格洛丽亚希望马克能从玩的游戏中学到更多。"]},
 {a:0, o:["A. Ron thinks gambling is more harmful than playing games.","B. Ron dislikes women addicted to playing games.","C. Ron thinks playing games surely leads to gambling.","D. Ron shows strong opposition to playing games."], t:["罗恩认为赌博比玩游戏更有害。","罗恩不喜欢沉迷于玩游戏的女性。","罗恩认为玩游戏一定会导致赌博。","罗恩对玩游戏表示强烈反对。"]},
 {a:0, o:["A. Some gaming addicts make friends when playing together.","B. Professional people are less likely to get addicted to games.","C. Only a small percentage of gamers are gambling.","D. There are more male addicts than female addicts."], t:["一些游戏瘾者在一起玩时交朋友。","专业人士不太可能对游戏上瘾。","只有一小部分游戏玩家在赌博。","男性瘾者比女性瘾者多。"]}
-]
+],
+"Section C": {p:"Britain almost more than any other country in the world must seriously face the problem of building upwards, that is to say, of accommodating a considerable （1） of its population in high blocks of flats. It is said that the English man （2） this type of （3）, but if the case is such, he does in fact differ from the （4） of most countries of the world today. In the past our own blocks of flats have been （5） with the lower-income groups and they have lacked the obvious （6）, such as central heating, constant hot water supply, electrically operated lifts from top to bottom, and so on, as well as such details, important notwithstanding, as easy facilities for （7） of dust and rubbish and storage places for baby carriages on the ground floor, playgrounds for children on the top of the buildings, and drying grounds for washing. It is likely that the dispute regarding flats versus individual houses will continue to （8） for a long time as far as Britain is concerned. And it is unfortunate that there should be hot feelings on both sides whenever this subject is raised. Those who oppose the building of flats base their case primarily on the （9） that everyone prefers an individual home and on the high cost per unit of accommodation. The latter ignores the higher cost of providing full services to a （10） community, and the cost in both money and time of the journeys to work for the suburban resident.",b:[{w:"proportion",t:"n. 比例，占比"},{w:"rejects",t:"v. 拒绝，否定"},{w:"existence",t:"n. 存在"},{w:"inhabitants",t:"n. 居民，住户"},{w:"associated",t:"adj. 相关联的；v. 联系，关联"},{w:"provisions",t:"n. 规定，条款；补给品"},{w:"disposal",t:"n. 处理，处置"},{w:"rage",t:"n. 暴怒，狂怒"},{w:"assumption",t:"n. 假定，假设"},{w:"scattered",t:"adj. 分散的，零散的；v. 散开，散布"}]}
 },
 
 "Unit 2": {
@@ -921,7 +1181,8 @@ const BANK = {
 {a:3, o:["A. Go fishing.","B. Go hiking.","C. Go sightseeing.","D. Go horseback riding."], t:["去钓鱼。","去远足。","去观光。","去骑马。"]},
 {a:3, o:["A. It must be a famous dog.","B. It must be a famous rock.","C. It must be a famous tree.","D. It must be a famous geyser."], t:["它一定是一条著名的狗。","它一定是一块著名的岩石。","它一定是一棵著名的树。","它一定是一个著名的间歇泉。"]},
 {a:1, o:["A. Chatting around the campfire.","B. Putting out the campfire.","C. Feeding the bear cub.","D. Making plans for tomorrow."], t:["围着篝火聊天。","扑灭篝火。","喂小熊。","制定明天的计划。"]}
-]
+],
+"Section C": {p:"When the first spring flowers blossom, Easter comes. It is the oldest Christian feast. in honor of the （1） of Jesus Christ.\n\nAlong with the traditional Easter walk or （2）, the giving of Easter eggs and more recently, of Easter presents is a main （3） of the feast. Parents give their children \"Easter eggs\" -- colored and （4） eggs, chocolate eggs, marzipan eggs -- Easter bunnies, sweets and other gifts. In some German regions, children （5） \"collect\" Easter eggs from their relatives, especially from their （6）.\n\nUsually, the Easter eggs are carefully hidden in the garden or in the house and the children must search for them on the morning of Easter Sunday. They are told that the Easter bunny has brought them. This （7） bunny is like Santa Claus at Christmas. But it is less of an \"educational\" figure than Santa Claus is, since the eggs are not given to children as （8） for being good.\n\nThe origin of the \"Easter egg\" custom is not fully known. It probably had to do with taxes which the peasants had to pay their persons. Easter was one of the dates when they became （9） and many eggs were among the payments. The lords of the land, especially the church, gave some eggs to the poor as a kind of charity.\n\nThe customs relating to gifts have changed with the （10） passage of time. Easter eggs have become \"surprise gifts\". Presents are now exchanged between individuals who want to surprise their friends or relatives and make them happy.",b:[{w:"rebirth",t:"n. 重生；新生"},{w:"outing",t:"n. 短途出游，户外活动"},{w:"feature",t:"n. 特色，特点；v. 以……为特色"},{w:"boiled",t:"adj. 煮沸的，煮熟的；v. 煮沸"},{w:"virtually",t:"adv. 几乎；实际上"},{w:"godparents",t:"n. 教父；教母（复数）"},{w:"mysterious",t:"adj. 神秘的"},{w:"rewards",t:"n. 回报，奖励；v. 奖赏"},{w:"due",t:"adj. 预定的；应得的；到期的"},{w:"passage",t:"n. 通道；一段文字；旅途"}]}
 },
 
 "Unit 3": {
@@ -971,7 +1232,8 @@ const BANK = {
 {a:0, o:["A. Mountains that are far away.","B. Thick forests with dangerous animals.","C. Beautiful beaches.","D. Safe and open fields."], t:["远处的山脉。","有危险动物的茂密森林。","美丽的海滩。","安全开阔的田野。"]},
 {a:3, o:["A. It is a good idea to set up hardship camps to help local people develop their economy.","B. Children are expected to know how hard life is on the island.","C. Traditional education also includes such things as hardship camps.","D. Hardship camps can be an important part of an education for children."], t:["建立吃苦夏令营帮助当地人发展经济是个好主意。","孩子们应该知道岛上的生活有多艰苦。","传统教育也包括吃苦夏令营这样的事情。","吃苦夏令营可以成为儿童教育的重要组成部分。"]},
 {a:0, o:["A. They like the idea of organizing hardship camps and support it.","B. They think hardship camps are better than a normal education.","C. They feel they should make preparations for their children.","D. They are satisfied with the living conditions in such camps."], t:["他们喜欢组织吃苦夏令营的想法并支持它。","他们认为吃苦夏令营比正常教育更好。","他们觉得应该为孩子们做准备。","他们对这种夏令营的生活条件感到满意。"]}
-]
+],
+"Section C": {p:"Have you been to Holland? Do you know what is special about this European country? Holland is also known as the Kingdom of the Netherlands, with a population of about 16 million. It's one of the big agricultural （1） in the world. The two important cities, Amsterdam and Rotterdam, are the world's largest ports. But the Dutch are living life in （2）.\n\nNearly a quarter of their country is below sea level. For centuries the Dutch have been waging a war with the water. They have tried their best to （3） their land. But as the land dries out, it's slowly sinking. What's more, the （4） makes things worse. Sea levels are rising. Today the Netherlands is faced with a frightening fact they are at risk of being （5） by water.\n\nThe Dutch people, however, （6）. They have built a series of huge barriers to hold back the ocean. Some ocean defenses they have built are almost the size of the Eiffel Tower. With these feats of （7）, Holland still exists today. For the Dutch, （8）. And the barricades are significant for survival.\n\nIn the last 50 years, the Dutch （9）. Looking ahead, they've set aside a further 25 billion dollars over the next 100 years. （10）.",b:[{w:"exporters",t:"n. 出口商；出口企业"},{w:"worry",t:"v./n. 担忧，发愁"},{w:"hold on to",t:"坚持；守住；保住"},{w:"change of climate",t:"气候变化"},{w:"wiped out",t:"彻底摧毁；消灭"},{w:"have responded",t:"已作出回应"},{w:"fantastic engineering",t:"精妙宏伟的水利工程"},{w:"the constant fear of flooding is a way of life",t:"常年担忧洪水泛滥已是当地人的常态"},{w:"have spent an unbelievably large sum of money on flood protection",t:"已经投入一笔数额惊人的巨款用于防洪工程"},{w:"As they say, every effort is made to keep their feet dry",t:"正如当地人所说，人们想尽一切办法避免遭受洪水侵袭"}]}
 },
 
 "Unit 4": {
@@ -1012,7 +1274,8 @@ const BANK = {
 {a:3, o:["A. He thinks that the classes are not useful to foreigners at all.","B. He thinks one should look for a native as a tutor after class.","C. He thinks such classes can help one become broad-minded.","D. He thinks one cannot learn about local culture well enough through a class."], t:["他认为这些课程对外国人根本没用。","他认为课后应该找一个当地人当辅导老师。","他认为这样的课程可以帮助人变得心胸开阔。","他认为通过课堂无法很好地了解当地文化。"]},
 {a:0, o:["A. Most local customs are learned through social life.","B. None of the customs can be learnt in the classroom.","C. One can learn local customs only when one is broad-minded.","D. One must overcome anxiety before learning local customs."], t:["大多数当地习俗是通过社交生活学到的。","没有习俗可以在课堂上学到。","只有心胸开阔才能学习当地习俗。","必须克服焦虑才能学习当地习俗。"]},
 {a:1, o:["A. A foreigner can never enjoy local culture and life.","B. One can learn to be involved in a new culture step by step.","C. Anyone will soon get used to the new culture.","D. One will easily get sick when transplanted abroad suddenly."], t:["外国人永远无法享受当地文化和生活。","人可以逐步学会融入新文化。","任何人都会很快适应新文化。","突然被移居国外时很容易生病。"]}
-]
+],
+"Section C": {p:"Swimming isn't something for everyone. Those who are overweight, pregnant or suffer from back pain may enjoy swimming since in water they weigh about one tenth of their weight on land. The water increases range of （1） for those with arthritis because there is less （2） to lift when raising an arm or leg. Additionally, the （3） surrounds most pools. It makes breathing easier for people with serious lung conditions.\n\nWith all its benefits, swimming has one major （4）: it requires one of the biggest pieces of equipment needed for any exercise -- a pool Finding a club or a community pool that is （5） both in terms of location and swim times can be a challenge.\n\nAdditionally, even though swimming is kind to your （6）, it doesn't place any stress on your bones. Weight-bearing exercise is （7） for maintaining bone mass and building strong bones, so you should supplement your swim with some other activities, such as walking, running or lifting weight.\n\nAssuming that you are an average swimmer, （8）. Try swimming a lap and resting for 30 seconds, or if that's too easy, swim for five minutes and rest for one, working up to a total of thirty minutes of active swimming. If your total time swimming is 20 to 30 minutes, （9） and more than if you walked for 20 to 30 minutes.\n\nMost importantly, don't judge your progress by the others around you. （10）, how many laps you can complete in a given time or simply by how good you feel after a few weeks.\n\nSoon enough you'll be healthier.",b:[{w:"motion",t:"n. 运动，动作"},{w:"weight",t:"n. 重量；体重"},{w:"humidity",t:"n. 湿度"},{w:"drawback",t:"n. 缺点，弊端"},{w:"convenient",t:"adj. 方便的，便利的"},{w:"joints",t:"n. 关节；连接处"},{w:"essential",t:"adj. 至关重要的，必不可少的"},{w:"three days a week is recommended for overall physical improvement",t:"建议每周锻炼三天，全面提升身体素质"},{w:"you'll get as much benefit as if you ran for 20 to 30 minutes",t:"你获得的锻炼效果等同于慢跑 20 至 30 分钟"},{w:"Track your personal progress by how long you can swim without stopping",t:"通过不间断游泳的时长，记录自己的锻炼进步"}]}
 },
 
 "Unit 5": {
@@ -1054,7 +1317,8 @@ const BANK = {
 {a:2, o:["A. His trip sets a shining example for scientists to learn from.","B. His trip shows his new ambition after his retirement.","C. His trip implies what attitude the aged should take towards life.","D. His trip means that the aged could take trips in space."], t:["他的旅行为科学家树立了光辉的学习榜样。","他的旅行展示了他退休后的新抱负。","他的旅行暗示了老年人应该对生活采取什么态度。","他的旅行意味着老年人可以去太空旅行。"]},
 {a:1, o:["A. He always does the right things.","B. He likes drinking very much.","C. He does not like eating potato.","D. He enjoys exercising very much."], t:["他总是做正确的事。","他非常喜欢喝酒。","他不喜欢吃土豆。","他非常喜欢锻炼。"]},
 {a:0, o:["A. The significance of Mr. Glenn's shuttle trip into space.","B. The environment of an orbit around the Earth.","C. The record of being the oldest in space.","D. The example of a speeded-up version of the aging process."], t:["格伦先生乘航天飞机进入太空的意义。","地球轨道的环境。","太空中年龄最大的纪录。","加速版衰老过程的例子。"]}
-]
+],
+"Section C": {p:"Sign Language is a communication system using gestures that are interpreted visually. Many people in deaf （1） around the world use sign languages as their primary means of communication. For babies that haven't yet learned to speak, sign language also （2） their primary language.\n\nBabies learn to clap their hands when they are happy and （3） their arms to be picked up. Most babies also learn to shake their （4） for no and nod for yes. The fact is, parents and babies have always used a limited form of sign language to communicate.\n\nResearch has shown that while babies may lack the fine motor （5） to speak, they do have the ability to understand and use language as early as 6-7 months. And given the right （6）, they have lots to say -- with their hands. When we teach a hearing baby basic signs, there is an immediate （7） in parent-baby communication that has never been possible before.\n\nResearchers tell us that the early years are prime time for acquiring language skills. It has been proven that （8）. In fact, hearing children who learn sign language have been shown to （9）.\n\nMost importantly, baby sign language （10） who cannot yet communicate with speech. Even older children love the \"secret\" communication that they can have with their parents in even the quietest of places.",b:[{w:"communities",t:"n. 社区；群体"},{w:"serves as",t:"充当；担任"},{w:"stretch out",t:"伸展；延伸"},{w:"heads",t:"n. 负责人；头部；v. 带领"},{w:"skills",t:"n. 技能，技巧"},{w:"guidance",t:"n. 指导，引导"},{w:"boost",t:"v./n. 促进；提升"},{w:"baby sign language does not delay speech",t:"婴儿手语并不会延缓语言发育"},{w:"score 12 points higher on IQ tests in later years",t:"日后智商测试得分高出 12 分"},{w:"increases trust between parent and child and decreases frustration for young children",t:"增进亲子间的信任，同时减少幼儿的烦躁情绪"}]}
 },
 
 "Unit 6": {
@@ -1093,7 +1357,8 @@ const BANK = {
 {a:3, o:["A. Because they don't use disposable products.","B. Because they don't believe in disposable products.","C. Because they have enough disposable products.","D. Because they use much too many disposable products."], t:["因为他们不使用一次性产品。","因为他们不相信一次性产品。","因为他们有足够的一次性产品。","因为他们使用了太多一次性产品。"]},
 {a:2, o:["A. To follow a typical American family.","B. To cut the use of water in our daily life.","C. To buy a special 'low-flow' shower head.","D. To use as much water as people drink."], t:["跟随一个典型的美国家庭。","减少日常生活中的用水量。","买一个特殊的'低流量'淋浴喷头。","使用和人们饮水量一样多的水。"]},
 {a:1, o:["A. Things people can do to burn less gasoline.","B. Things people can do to reduce pollution.","C. Things people can do to prevent the forest from shrinking.","D. Things people can do to save water in our daily life."], t:["人们可以做的减少汽油消耗的事情。","人们可以做的减少污染的事情。","人们可以做的防止森林缩小的事情。","人们可以在日常生活中做的节约用水的事情。"]}
-]
+],
+"Section C": {p:"When I was in the 8th grade, a girl that rode the same school bus as I did had a terrible accident. As she was running to the bus, she （1）. She survived the accident but was paralyzed.\n\nI want to see her, thinking that she wouldn't have much of a life now. Over the years, I moved, married, and had children, and didn't think much about Helen after that.\n\nThree years ago, in Florida, my son was hit by a car, thrown 90 feet, and landed on his head, suffering a horrid brain injury. He was （2）. While in my son's room, the phone rang, and a lady said that she was the center's social worker. It was a particularly trying day. I burst into tears for no reason, and heard the click of the call being disconnected.\n\nA short time later, a beautiful woman, in a wheelchair, rolled into my son's room, After 16 years, I still recognized Helen. She smiled and motioned for me to come closer. I told her who I was, and （3）, she began to tell me about her life since we last saw each other. She had children, and got her degree so that （4）. She told me that if there was anything she could give me, it would be hope.\n\nLooking at this wonderful, giving person, I felt small. But I also felt hope, the first I had since learning that my son was hurt. From this person （5）.\n\nI learned to never give up. And I learned that when there is life, there is hope.",b:[{w:"slipped on ice and fell under the rear wheels of the bus",t:"她在冰面上滑倒，摔到了公交车后轮下方"},{w:"transferred to a rehabilitation center",t:"被转送至康复中心"},{w:"after we both got over the shock of that",t:"在我们二人都从这场惊吓中缓过来之后"},{w:"she could smooth the path for those less fortunate than her",t:"她可以为那些比自己不幸的人铺平前路"},{w:"that I thought would have no quality of life",t:"我原本以为（这样的人生）毫无生活质量可言"}]}
 }
 };
 
@@ -1101,9 +1366,14 @@ const BANK = {
 let allQuestions = [];
 let qIndex = 0;
 
+// Strip "A. " / "B. " / "C. " / "D. " prefix from option text
+function stripOptPrefix(s) { return s.replace(/^[A-D]\.\s*/, ''); }
+
 Object.keys(BANK).forEach(unit => {
     Object.keys(BANK[unit]).forEach(section => {
-        BANK[unit][section].forEach((q, i) => {
+        const data = BANK[unit][section];
+        if (!Array.isArray(data)) return; // skip Section C (object, not array)
+        data.forEach((q, i) => {
             allQuestions.push({
                 id: qIndex++,
                 unit,
@@ -1123,6 +1393,28 @@ let currentView = 'welcome'; // welcome | chapter | random | exam | stats | resu
 let currentChapter = null;
 let examState = null;
 let examTimer = null;
+let optionShuffleMap = {}; // qId -> shuffled order array (e.g. [2,0,3,1])
+let lastUsedIds = new Set(); // track last-used question IDs to avoid repetition
+let shuffleOptions = localStorage.getItem('en_study_shuffle') !== 'false'; // default true
+
+// ==================== Mobile Sidebar ====================
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('show');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('show');
+}
+
+// Clear exam state when navigating away
+function clearExamState() {
+    if (examTimer) { clearInterval(examTimer); examTimer = null; }
+    if (examState && !examState.submitted) { examState.submitted = true; }
+    examState = null;
+}
 
 // Persistent stats
 let stats = loadStats();
@@ -1139,8 +1431,8 @@ function saveStats() {
     localStorage.setItem('en_study_stats', JSON.stringify(stats));
 }
 
-function recordAnswer(qId, isCorrect) {
-    stats.answered[qId] = { correct: isCorrect, time: Date.now() };
+function recordAnswer(qId, isCorrect, selectedIdx) {
+    stats.answered[qId] = { correct: isCorrect, selectedIdx: selectedIdx, time: Date.now() };
     saveStats();
     updateStatsBar();
 }
@@ -1162,6 +1454,7 @@ function getUnitStats(unit) {
 function getSectionType(section) {
     if (section.startsWith('Section A')) return 'A';
     if (section.startsWith('Section B')) return 'B';
+    if (section.startsWith('Section C')) return 'C';
     return 'F';
 }
 
@@ -1186,10 +1479,44 @@ function setActiveNav(el) {
 function shuffle(arr) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+        let j;
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            // Rejection sampling to eliminate modulo bias
+            const limit = Math.floor(0xFFFFFFFF / (i + 1)) * (i + 1);
+            const buf = new Uint32Array(1);
+            do { crypto.getRandomValues(buf); } while (buf[0] >= limit);
+            j = buf[0] % (i + 1);
+        } else {
+            j = Math.floor(Math.random() * (i + 1));
+        }
         [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
+}
+
+// Generate shuffled option order for a question (e.g. [2,0,3,1])
+function makeShuffleOrder(n) {
+    return shuffle([...Array(n).keys()]);
+}
+
+// Build optionShuffleMap for a set of questions
+function buildShuffleMap(questions) {
+    const map = {};
+    questions.forEach(q => { map[q.id] = makeShuffleOrder(q.options.length); });
+    return map;
+}
+
+// Given a shuffled display index, find the original option index
+function displayToOriginal(qId, displayIdx) {
+    const order = optionShuffleMap[qId];
+    return order ? order[displayIdx] : displayIdx;
+}
+
+// Given an original option index, find the shuffled display index
+function originalToDisplay(qId, origIdx) {
+    const order = optionShuffleMap[qId];
+    if (!order) return origIdx;
+    return order.indexOf(origIdx);
 }
 
 // ==================== SIDEBAR ====================
@@ -1203,7 +1530,7 @@ function initSidebar() {
 
         const header = document.createElement('div');
         header.className = 'nav-group-header';
-        const totalQ = Object.values(BANK[unit]).reduce((s, arr) => s + arr.length, 0);
+        const totalQ = Object.values(BANK[unit]).reduce((s, v) => s + (Array.isArray(v) ? v.length : 0), 0);
         header.innerHTML = `<span>${unit}</span><span class="arrow">▼</span>`;
 
         const items = document.createElement('div');
@@ -1219,7 +1546,9 @@ function initSidebar() {
         Object.keys(BANK[unit]).forEach(section => {
             const item = document.createElement('div');
             item.className = 'nav-item';
-            item.innerHTML = `<span>${section}</span><span class="count">${BANK[unit][section].length}</span>`;
+            const isSectionC = section.startsWith('Section C');
+            const count = isSectionC ? '填空' : BANK[unit][section].length;
+            item.innerHTML = `<span>${section}</span><span class="count">${count}</span>`;
             item.onclick = () => { setActiveNav(item); loadChapter(unit, section); };
             items.appendChild(item);
         });
@@ -1246,8 +1575,15 @@ function setMode(mode) {
     }
 }
 
+function toggleShuffleOptions(checked) {
+    shuffleOptions = checked;
+    localStorage.setItem('en_study_shuffle', checked ? 'true' : 'false');
+}
+
 // ==================== WELCOME PAGE ====================
 function showWelcome() {
+    closeSidebar();
+    clearExamState();
     currentView = 'welcome';
     setTopbar('英语听力复习系统', '选择章节或开始练习');
     setActiveNav(null);
@@ -1258,17 +1594,17 @@ function showWelcome() {
         <div class="welcome">
             <div class="welcome-icon">📖</div>
             <h2>英语听力复习系统</h2>
-            <p>涵盖 6 个单元、${allQuestions.length} 道听力选择题。支持章节练习、随机抽题和模拟试卷三种模式，助你高效备考。</p>
+            <p>涵盖 6 个单元、${allQuestions.length} 道听力选择题 + 6 篇 Section C 填空。支持章节练习和模拟试卷两种模式，助你高效备考。</p>
             <div class="welcome-cards">
                 <div class="welcome-card" onclick="startMockExam()">
                     <div class="wc-icon">📝</div>
                     <h3>模拟试卷</h3>
-                    <p>从各单元随机抽取 A/B/Follow Up 组成完整试卷，限时作答</p>
+                    <p>随机抽取各单元完整 Section 组成试卷，含 A/B/C/Follow Up 四部分</p>
                 </div>
                 <div class="welcome-card" onclick="startRandomQuiz()">
                     <div class="wc-icon">🎲</div>
                     <h3>随机练习</h3>
-                    <p>随机抽取 10 道题目进行快速练习</p>
+                    <p>随机抽取 20 道选择题进行快速练习</p>
                 </div>
                 <div class="welcome-card" onclick="showStats()">
                     <div class="wc-icon">📊</div>
@@ -1291,8 +1627,17 @@ function resetAllStats() {
 
 // ==================== LOAD CHAPTER ====================
 function loadChapter(unit, section) {
+    closeSidebar();
+    clearExamState();
     currentView = 'chapter';
     currentChapter = { unit, section };
+    optionShuffleMap = {}; // no shuffling in chapter mode
+
+    // Section C: render fill-in-the-blank view
+    if (section && section.startsWith('Section C')) {
+        renderSectionC(unit, section);
+        return;
+    }
 
     let questions;
     if (section) {
@@ -1300,10 +1645,44 @@ function loadChapter(unit, section) {
         setTopbar(`${unit} - ${section}`, `${questions.length} 道题目`);
     } else {
         questions = allQuestions.filter(q => q.unit === unit);
-        setTopbar(unit, `${questions.length} 道题目 · ${Object.keys(BANK[unit]).length} 个部分`);
+        const sectionCount = Object.keys(BANK[unit]).length;
+        setTopbar(unit, `${questions.length} 道题目 · ${sectionCount} 个部分`);
     }
 
     renderQuiz(questions);
+
+    // If viewing full unit, also render Section C at the bottom
+    if (!section) {
+        const secCKey = Object.keys(BANK[unit]).find(k => k.startsWith('Section C'));
+        if (secCKey) {
+            const secCData = BANK[unit][secCKey];
+            if (secCData && secCData.p) {
+                const content = document.getElementById('content-area');
+                let secCHtml = `<div class="exam-section-title" style="margin-top:24px;">Section C — 填空</div>`;
+                secCHtml += `<div class="section-c-card">
+                    <div class="sc-toolbar">
+                        <button class="action-btn secondary" style="font-size:0.78rem;padding:4px 12px;" onclick="revealAllBlanksUnit('${unit}')">显示全部答案</button>
+                        <button class="action-btn warning" style="font-size:0.78rem;padding:4px 12px;" onclick="hideAllBlanksUnit('${unit}')">隐藏全部答案</button>
+                    </div>
+                    <div class="sc-passage">`;
+                const blanks = secCData.b || [];
+                const parts = secCData.p.split(/（(\d+)）/);
+                parts.forEach((part, i) => {
+                    if (i % 2 === 0) {
+                        secCHtml += part.replace(/\n/g, '<br>');
+                    } else {
+                        const idx = parseInt(part) - 1;
+                        const blank = blanks[idx];
+                        if (blank) {
+                            secCHtml += `<span class="sc-blank" id="unit-blank-${idx}" onclick="unitToggleBlank(${idx})" data-word="${blank.w}" data-trans="${blank.t}" title="点击查看答案">(${part})</span>`;
+                        }
+                    }
+                });
+                secCHtml += `</div></div>`;
+                content.insertAdjacentHTML('beforeend', secCHtml);
+            }
+        }
+    }
 
     // Add chapter actions bar
     const content = document.getElementById('content-area');
@@ -1316,6 +1695,25 @@ function loadChapter(unit, section) {
         ${answeredCount > 0 ? `<button class="clear-progress-btn" onclick="clearUnitProgress('${unit}', ${section ? `'${section}'` : 'null'})">清空本${section ? '节' : '单元'}进度</button>` : ''}
     `;
     content.insertBefore(actionBar, content.firstChild);
+}
+
+function updateChapterActions() {
+    if (currentView !== 'chapter' || !currentChapter) return;
+    const actionBar = document.querySelector('.chapter-actions');
+    if (!actionBar) return;
+    const { unit, section } = currentChapter;
+    let questions;
+    if (section) {
+        questions = allQuestions.filter(q => q.unit === unit && q.section === section);
+    } else {
+        questions = allQuestions.filter(q => q.unit === unit);
+    }
+    const answeredCount = questions.filter(q => stats.answered[q.id] !== undefined).length;
+    const correctCount = questions.filter(q => stats.answered[q.id] !== undefined && stats.answered[q.id].correct).length;
+    actionBar.innerHTML = `
+        <span class="ca-info">进度：<strong>${answeredCount}/${questions.length}</strong> · 正确：<strong>${correctCount}</strong>${answeredCount > 0 ? ` · 正确率：<strong>${Math.round(correctCount/answeredCount*100)}%</strong>` : ''}</span>
+        ${answeredCount > 0 ? `<button class="clear-progress-btn" onclick="clearUnitProgress('${unit}', ${section ? `'${section}'` : 'null'})">清空本${section ? '节' : '单元'}进度</button>` : ''}
+    `;
 }
 
 function clearUnitProgress(unit, section) {
@@ -1337,14 +1735,144 @@ function clearUnitProgress(unit, section) {
     loadChapter(unit, section);
 }
 
+// ==================== SECTION C RENDER ====================
+function renderSectionC(unit, section) {
+    const data = BANK[unit][section];
+    if (!data || !data.p) return;
+
+    setTopbar(`${unit} - ${section}`, `填空题 · 点击空格查看答案`);
+    const content = document.getElementById('content-area');
+
+    // Replace （N） with clickable blanks
+    let html = `<div class="section-c-card">
+        <div class="sc-toolbar">
+            <button class="action-btn secondary" style="font-size:0.78rem;padding:4px 12px;" onclick="revealAllBlanks()">显示全部答案</button>
+            <button class="action-btn warning" style="font-size:0.78rem;padding:4px 12px;" onclick="hideAllBlanks()">隐藏全部答案</button>
+        </div>
+        <div class="sc-passage">`;
+
+    const passage = data.p;
+    const blanks = data.b || [];
+    let blankIdx = 0;
+    const parts = passage.split(/（(\d+)）/);
+
+    parts.forEach((part, i) => {
+        if (i % 2 === 0) {
+            // Text part
+            html += part.replace(/\n/g, '<br>');
+        } else {
+            // Blank number
+            const idx = parseInt(part) - 1;
+            const blank = blanks[idx];
+            if (blank) {
+                html += `<span class="sc-blank" id="blank-${idx}" onclick="toggleBlank(${idx})" data-word="${blank.w}" data-trans="${blank.t}" title="点击查看答案">(${part})</span>`;
+            }
+        }
+    });
+
+    html += `</div>
+        <div class="sc-answer-list" id="sc-answer-list" style="display:none;">`;
+
+    blanks.forEach((b, i) => {
+        html += `<div class="sc-answer-item"><span class="sc-answer-num">${i+1}</span> <strong>${b.w}</strong> <span class="sc-answer-trans">${b.t}</span></div>`;
+    });
+
+    html += `</div></div>`;
+    content.innerHTML = html;
+    content.scrollTop = 0;
+}
+
+function toggleBlank(idx) {
+    const el = document.getElementById(`blank-${idx}`);
+    if (!el) return;
+    if (el.classList.contains('revealed')) {
+        el.classList.remove('revealed');
+        el.textContent = `(${idx + 1})`;
+    } else {
+        el.classList.add('revealed');
+        el.innerHTML = `<strong>${el.dataset.word}</strong> <span class="sc-blank-trans">${el.dataset.trans}</span>`;
+    }
+}
+
+function revealAllBlanks() {
+    const data = BANK[currentChapter.unit][currentChapter.section];
+    if (!data || !data.b) return;
+    data.b.forEach((b, i) => {
+        const el = document.getElementById(`blank-${i}`);
+        if (el && !el.classList.contains('revealed')) {
+            el.classList.add('revealed');
+            el.innerHTML = `<strong>${el.dataset.word}</strong> <span class="sc-blank-trans">${el.dataset.trans}</span>`;
+        }
+    });
+    document.getElementById('sc-answer-list').style.display = 'block';
+}
+
+function hideAllBlanks() {
+    const data = BANK[currentChapter.unit][currentChapter.section];
+    if (!data || !data.b) return;
+    data.b.forEach((b, i) => {
+        const el = document.getElementById(`blank-${i}`);
+        if (el && el.classList.contains('revealed')) {
+            el.classList.remove('revealed');
+            el.textContent = `(${i + 1})`;
+        }
+    });
+    document.getElementById('sc-answer-list').style.display = 'none';
+}
+
+function unitToggleBlank(idx) {
+    const el = document.getElementById(`unit-blank-${idx}`);
+    if (!el) return;
+    if (el.classList.contains('revealed')) {
+        el.classList.remove('revealed');
+        el.textContent = `(${idx + 1})`;
+    } else {
+        el.classList.add('revealed');
+        el.innerHTML = `<strong>${el.dataset.word}</strong> <span class="sc-blank-trans">${el.dataset.trans}</span>`;
+    }
+}
+
+function revealAllBlanksUnit(unit) {
+    const secCKey = Object.keys(BANK[unit]).find(k => k.startsWith('Section C'));
+    if (!secCKey) return;
+    const blanks = BANK[unit][secCKey].b || [];
+    blanks.forEach((b, i) => {
+        const el = document.getElementById(`unit-blank-${i}`);
+        if (el && !el.classList.contains('revealed')) {
+            el.classList.add('revealed');
+            el.innerHTML = `<strong>${el.dataset.word}</strong> <span class="sc-blank-trans">${el.dataset.trans}</span>`;
+        }
+    });
+}
+
+function hideAllBlanksUnit(unit) {
+    const secCKey = Object.keys(BANK[unit]).find(k => k.startsWith('Section C'));
+    if (!secCKey) return;
+    const blanks = BANK[unit][secCKey].b || [];
+    blanks.forEach((b, i) => {
+        const el = document.getElementById(`unit-blank-${i}`);
+        if (el && el.classList.contains('revealed')) {
+            el.classList.remove('revealed');
+            el.textContent = `(${i + 1})`;
+        }
+    });
+}
+
 // ==================== RANDOM QUIZ ====================
 function startRandomQuiz() {
+    closeSidebar();
+    clearExamState();
     currentView = 'random';
     currentChapter = null;
     setActiveNav(null);
-    setTopbar('随机练习', '随机抽取 10 道题目');
+    setTopbar('随机练习', '随机抽取 20 道题目');
 
-    const selected = shuffle(allQuestions).slice(0, 10);
+    // Prefer questions not used last time
+    const freshPool = allQuestions.filter(q => !lastUsedIds.has(q.id));
+    const pool = freshPool.length >= 20 ? freshPool : allQuestions;
+    const selected = shuffle(pool).slice(0, 20);
+    lastUsedIds = new Set(selected.map(q => q.id));
+    optionShuffleMap = buildShuffleMap(selected);
     renderQuiz(selected);
 }
 
@@ -1352,11 +1880,14 @@ function startRandomQuiz() {
 function renderQuiz(questions) {
     const content = document.getElementById('content-area');
     const isStudy = currentMode === 'study';
+    const shouldShuffle = (currentView === 'random' || currentView === 'exam') && shuffleOptions;
 
     let html = `<div class="${isStudy ? 'study-mode' : ''}">`;
+    const ignoreHistory = (currentView === 'random' || currentView === 'exam');
     questions.forEach((q, idx) => {
-        const answered = stats.answered[q.id];
+        const answered = ignoreHistory ? undefined : stats.answered[q.id];
         const letters = ['A', 'B', 'C', 'D'];
+        const order = shouldShuffle && optionShuffleMap[q.id] ? optionShuffleMap[q.id] : [...Array(q.options.length).keys()];
 
         html += `<div class="question-card" id="qcard-${q.id}">`;
         html += `<div class="q-header">
@@ -1368,29 +1899,29 @@ function renderQuiz(questions) {
         </div>`;
         html += `<div class="q-body"><ul class="options-list" id="opts-${q.id}">`;
 
-        q.options.forEach((opt, oi) => {
+        order.forEach((origIdx, dispIdx) => {
             let cls = 'option-item';
-            if (isStudy && oi === q.answer) cls += ' correct-answer';
+            if (isStudy && origIdx === q.answer) cls += ' correct-answer';
             if (answered !== undefined && !isStudy) {
                 cls += ' disabled';
-                if (oi === q.answer) cls += ' correct';
-                if (oi !== q.answer && answered && !answered.correct && stats.answered[q.id] && stats.answered[q.id].selectedIdx === oi) cls += ' wrong';
+                if (origIdx === q.answer) cls += ' correct';
+                if (origIdx !== q.answer && answered && !answered.correct && stats.answered[q.id] && stats.answered[q.id].selectedIdx === origIdx) cls += ' wrong';
             }
 
             // Only show translation after answering or in study mode
             const showTrans = (answered !== undefined) || isStudy;
-            const trans = (showTrans && q.translations && q.translations[oi]) ? `<span class="option-translation">${q.translations[oi]}</span>` : '';
-            html += `<li class="${cls}" data-qid="${q.id}" data-oi="${oi}" onclick="handleOptionClick(${q.id}, ${oi})">
-                <span class="option-letter">${letters[oi]}</span>
-                <span class="option-content">${opt}${trans}</span>
+            const trans = (showTrans && q.translations && q.translations[origIdx]) ? `<span class="option-translation">${q.translations[origIdx]}</span>` : '';
+            html += `<li class="${cls}" data-qid="${q.id}" data-oi="${origIdx}" onclick="handleOptionClick(${q.id}, ${origIdx})">
+                <span class="option-letter">${letters[dispIdx]}</span>
+                <span class="option-content">${stripOptPrefix(q.options[origIdx])}${trans}</span>
             </li>`;
         });
 
         html += `</ul></div>`;
 
-        // Build translation list for feedback
+        // Build translation list for feedback (always in original order)
         const transList = q.translations && q.translations.length > 0
-            ? q.options.map((opt, oi) => `<div class="trans-line"><span class="trans-letter ${oi === q.answer ? 'trans-correct' : ''}">${letters[oi]}</span> ${opt} <span class="trans-zh">${q.translations[oi] || ''}</span></div>`).join('')
+            ? q.options.map((opt, oi) => `<div class="trans-line"><span class="trans-letter ${oi === q.answer ? 'trans-correct' : ''}">${letters[oi]}</span> ${stripOptPrefix(opt)} <span class="trans-zh">${q.translations[oi] || ''}</span></div>`).join('')
             : '';
 
         // Feedback area
@@ -1453,7 +1984,7 @@ function handleOptionClick(qId, optIdx) {
     const fb = document.getElementById(`fb-${qId}`);
     if (fb) {
         const transList = q.translations && q.translations.length > 0
-            ? q.options.map((opt, oi) => `<div class="trans-line"><span class="trans-letter ${oi === q.answer ? 'trans-correct' : ''}">${letters[oi]}</span> ${opt} <span class="trans-zh">${q.translations[oi] || ''}</span></div>`).join('')
+            ? q.options.map((opt, oi) => `<div class="trans-line"><span class="trans-letter ${oi === q.answer ? 'trans-correct' : ''}">${letters[oi]}</span> ${stripOptPrefix(opt)} <span class="trans-zh">${q.translations[oi] || ''}</span></div>`).join('')
             : '';
         fb.className = `feedback-area show ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`;
         fb.innerHTML = `<strong>${isCorrect ? '✅ 回答正确！' : '❌ 回答错误！'}</strong>
@@ -1462,34 +1993,47 @@ function handleOptionClick(qId, optIdx) {
     }
 
     updateStatsBar();
+    updateChapterActions();
 }
-
-// ==================== MOCK EXAM ====================
 function startMockExam() {
+    closeSidebar();
+    clearExamState();
     currentView = 'exam';
     currentChapter = null;
     setActiveNav(null);
 
-    // Build exam: pick from each section type across all units
-    const sectionA = shuffle(allQuestions.filter(q => getSectionType(q.section) === 'A'));
-    const sectionB = shuffle(allQuestions.filter(q => getSectionType(q.section) === 'B'));
-    const followUp = shuffle(allQuestions.filter(q => getSectionType(q.section) === 'F'));
+    const units = Object.keys(BANK);
 
-    const examQuestions = [
-        ...sectionA.slice(0, 10),
-        ...sectionB.slice(0, 5),
-        ...followUp.slice(0, 5)
-    ];
+    // Pick a random unit independently for each section type (can repeat)
+    const pick = () => units[Math.floor(Math.random() * units.length)];
+    const unitForA = pick();
+    const unitForB = pick();
+    const unitForC = pick();
+    const unitForF = pick();
+
+    // Gather questions
+    const secAQuestions = allQuestions.filter(q => q.unit === unitForA && getSectionType(q.section) === 'A');
+    const secBQuestions = allQuestions.filter(q => q.unit === unitForB && getSectionType(q.section) === 'B');
+    const secFQuestions = allQuestions.filter(q => q.unit === unitForF && getSectionType(q.section) === 'F');
+    const secCData = BANK[unitForC]['Section C'];
+
+    const examQuestions = [...secAQuestions, ...secBQuestions, ...secFQuestions];
+
+    lastUsedIds = new Set(examQuestions.map(q => q.id));
 
     examState = {
         questions: examQuestions,
-        answers: {}, // qId -> selectedIdx
+        sectionCUnit: unitForC,
+        sectionCData: secCData,
+        answers: {},
         startTime: Date.now(),
-        duration: 20 * 60, // 20 minutes
+        duration: 30 * 60, // 30 minutes
         submitted: false
     };
+    optionShuffleMap = buildShuffleMap(examQuestions);
 
-    setTopbar('模拟试卷', `${examQuestions.length} 道题目 · 限时 20 分钟`);
+    const totalChoice = examQuestions.length;
+    setTopbar('模拟试卷', `选择题 ${totalChoice} 题 + Section C 填空 · 限时 30 分钟`);
     renderExam();
     startExamTimer();
 }
@@ -1522,35 +2066,64 @@ function renderExam() {
     const letters = ['A', 'B', 'C', 'D'];
     const content = document.getElementById('content-area');
 
+    const secA = eq.filter(q => getSectionType(q.section) === 'A');
+    const secB = eq.filter(q => getSectionType(q.section) === 'B');
+    const secF = eq.filter(q => getSectionType(q.section) === 'F');
+    const secCUnit = examState.sectionCUnit;
+    const secCData = examState.sectionCData;
+
     let html = `
         <div class="exam-header">
             <div>
                 <h3>模拟试卷</h3>
-                <p>Section A × 10 · Section B × 5 · Follow Up × 5 · 共 ${eq.length} 题</p>
+                <p>Section A (${secAUnit()}) · Section B (${secBUnit()}) · Section C (${secCUnit}) · Follow Up (${secFUnit()})</p>
             </div>
-            <div class="exam-timer" id="exam-timer">20:00</div>
+            <div class="exam-timer" id="exam-timer">30:00</div>
         </div>
         <div class="exam-progress">
             <div class="progress-bar-bg"><div class="progress-bar-fill" id="exam-progress-bar" style="width:0%"></div></div>
             <div class="progress-text">
                 <span id="exam-progress-text">已答 0 / ${eq.length}</span>
-                <span>限时 20 分钟</span>
+                <span>限时 30 分钟</span>
             </div>
         </div>
     `;
 
-    // Section A
-    const secA = eq.filter(q => getSectionType(q.section) === 'A');
-    const secB = eq.filter(q => getSectionType(q.section) === 'B');
-    const secF = eq.filter(q => getSectionType(q.section) === 'F');
-
-    html += `<div class="exam-section-title">Part I · Section A — 短对话 (${secA.length} 题)</div>`;
+    // Part I: Section A
+    html += `<div class="exam-section-title">Part I · Section A — 短对话 (${secAUnit()}) (${secA.length} 题)</div>`;
     secA.forEach((q, i) => { html += renderExamQuestion(q, i + 1, letters); });
 
-    html += `<div class="exam-section-title">Part II · Section B — 篇章听力 (${secB.length} 题)</div>`;
+    // Part II: Section B
+    html += `<div class="exam-section-title">Part II · Section B — 篇章听力 (${secBUnit()}) (${secB.length} 题)</div>`;
     secB.forEach((q, i) => { html += renderExamQuestion(q, secA.length + i + 1, letters); });
 
-    html += `<div class="exam-section-title">Part III · Follow Up — 综合理解 (${secF.length} 题)</div>`;
+    // Part III: Section C — Fill in the blanks
+    if (secCData && secCData.p) {
+        html += `<div class="exam-section-title">Part III · Section C — 填空 (${secCUnit})</div>`;
+        html += `<div class="section-c-card" style="margin-bottom:16px;">
+            <div class="sc-toolbar">
+                <button class="action-btn secondary" style="font-size:0.78rem;padding:4px 12px;" onclick="examRevealAll()">显示全部答案</button>
+                <button class="action-btn warning" style="font-size:0.78rem;padding:4px 12px;" onclick="examHideAll()">隐藏全部答案</button>
+            </div>
+            <div class="sc-passage">`;
+        const blanks = secCData.b || [];
+        const parts = secCData.p.split(/（(\d+)）/);
+        parts.forEach((part, i) => {
+            if (i % 2 === 0) {
+                html += part.replace(/\n/g, '<br>');
+            } else {
+                const idx = parseInt(part) - 1;
+                const blank = blanks[idx];
+                if (blank) {
+                    html += `<span class="sc-blank" id="exam-blank-${idx}" onclick="examToggleBlank(${idx})" data-word="${blank.w}" data-trans="${blank.t}" title="点击查看答案">(${part})</span>`;
+                }
+            }
+        });
+        html += `</div></div>`;
+    }
+
+    // Part IV: Follow Up
+    html += `<div class="exam-section-title">Part IV · Follow Up — 综合理解 (${secFUnit()}) (${secF.length} 题)</div>`;
     secF.forEach((q, i) => { html += renderExamQuestion(q, secA.length + secB.length + i + 1, letters); });
 
     html += `
@@ -1563,7 +2136,46 @@ function renderExam() {
     content.scrollTop = 0;
 }
 
+function secAUnit() { return examState.questions.find(q => getSectionType(q.section) === 'A')?.unit || ''; }
+function secBUnit() { return examState.questions.find(q => getSectionType(q.section) === 'B')?.unit || ''; }
+function secFUnit() { return examState.questions.find(q => getSectionType(q.section) === 'F')?.unit || ''; }
+
+function examToggleBlank(idx) {
+    const el = document.getElementById(`exam-blank-${idx}`);
+    if (!el) return;
+    if (el.classList.contains('revealed')) {
+        el.classList.remove('revealed');
+        el.textContent = `(${idx + 1})`;
+    } else {
+        el.classList.add('revealed');
+        el.innerHTML = `<strong>${el.dataset.word}</strong> <span class="sc-blank-trans">${el.dataset.trans}</span>`;
+    }
+}
+
+function examRevealAll() {
+    const blanks = examState.sectionCData.b || [];
+    blanks.forEach((b, i) => {
+        const el = document.getElementById(`exam-blank-${i}`);
+        if (el && !el.classList.contains('revealed')) {
+            el.classList.add('revealed');
+            el.innerHTML = `<strong>${el.dataset.word}</strong> <span class="sc-blank-trans">${el.dataset.trans}</span>`;
+        }
+    });
+}
+
+function examHideAll() {
+    const blanks = examState.sectionCData.b || [];
+    blanks.forEach((b, i) => {
+        const el = document.getElementById(`exam-blank-${i}`);
+        if (el && el.classList.contains('revealed')) {
+            el.classList.remove('revealed');
+            el.textContent = `(${i + 1})`;
+        }
+    });
+}
+
 function renderExamQuestion(q, num, letters) {
+    const order = shuffleOptions && optionShuffleMap[q.id] ? optionShuffleMap[q.id] : [...Array(q.options.length).keys()];
     let html = `<div class="question-card" id="qcard-${q.id}">
         <div class="q-header">
             <span style="display:flex;align-items:center;">
@@ -1574,11 +2186,11 @@ function renderExamQuestion(q, num, letters) {
         </div>
         <div class="q-body"><ul class="options-list" id="opts-${q.id}">`;
 
-    q.options.forEach((opt, oi) => {
-        const selected = examState.answers[q.id] === oi;
-        html += `<li class="option-item ${selected ? 'exam-selected' : ''}" data-qid="${q.id}" data-oi="${oi}" onclick="handleExamOptionClick(${q.id}, ${oi})">
-            <span class="option-letter">${letters[oi]}</span>
-            <span>${opt}</span>
+    order.forEach((origIdx, dispIdx) => {
+        const selected = examState.answers[q.id] === origIdx;
+        html += `<li class="option-item ${selected ? 'exam-selected' : ''}" data-qid="${q.id}" data-oi="${origIdx}" onclick="handleExamOptionClick(${q.id}, ${origIdx})">
+            <span class="option-letter">${letters[dispIdx]}</span>
+            <span>${stripOptPrefix(q.options[origIdx])}</span>
         </li>`;
     });
 
@@ -1620,7 +2232,7 @@ function submitExam() {
         const isCorrect = selected === q.answer;
 
         if (selected !== undefined) {
-            recordAnswer(q.id, isCorrect);
+            recordAnswer(q.id, isCorrect, selected);
         }
 
         // Update card visual
@@ -1639,7 +2251,7 @@ function submitExam() {
         const card = document.getElementById(`qcard-${q.id}`);
         if (card) {
             const transList = q.translations && q.translations.length > 0
-                ? q.options.map((opt, oi) => `<div class="trans-line"><span class="trans-letter ${oi === q.answer ? 'trans-correct' : ''}">${letters[oi]}</span> ${opt} <span class="trans-zh">${q.translations[oi] || ''}</span></div>`).join('')
+                ? q.options.map((opt, oi) => `<div class="trans-line"><span class="trans-letter ${oi === q.answer ? 'trans-correct' : ''}">${letters[oi]}</span> ${stripOptPrefix(opt)} <span class="trans-zh">${q.translations[oi] || ''}</span></div>`).join('')
                 : '';
             const fb = document.createElement('div');
             fb.className = `feedback-area show ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`;
@@ -1707,6 +2319,8 @@ function submitExam() {
 
 // ==================== STATISTICS ====================
 function showStats() {
+    closeSidebar();
+    clearExamState();
     currentView = 'stats';
     currentChapter = null;
     setActiveNav(null);
@@ -1754,9 +2368,10 @@ function showStats() {
     html += `</div>`;
 
     // Section type breakdown
-    const typeStats = { A: { total: 0, correct: 0, answered: 0 }, B: { total: 0, correct: 0, answered: 0 }, F: { total: 0, correct: 0, answered: 0 } };
+    const typeStats = { A: { total: 0, correct: 0, answered: 0 }, B: { total: 0, correct: 0, answered: 0 }, C: { total: 0, correct: 0, answered: 0 }, F: { total: 0, correct: 0, answered: 0 } };
     allQuestions.forEach(q => {
         const t = getSectionType(q.section);
+        if (!typeStats[t]) typeStats[t] = { total: 0, correct: 0, answered: 0 };
         typeStats[t].total++;
         if (stats.answered[q.id] !== undefined) {
             typeStats[t].answered++;
@@ -1785,6 +2400,12 @@ function showStats() {
                 <div class="ust-bar"><div class="ust-bar-fill" style="width:${typeStats.F.answered > 0 ? Math.round(typeStats.F.correct/typeStats.F.answered*100) : 0}%;background:var(--warning)"></div></div>
                 <span class="ust-pct" style="color:#B45309">${typeStats.F.answered > 0 ? Math.round(typeStats.F.correct/typeStats.F.answered*100) + '%' : '-'}</span>
             </div>
+            <div class="ust-row">
+                <span class="ust-name">Section C · 填空</span>
+                <span style="font-size:0.78rem;color:var(--text-secondary);width:80px;text-align:center;">6 篇</span>
+                <div class="ust-bar"><div class="ust-bar-fill" style="width:0%;background:#8B5CF6"></div></div>
+                <span class="ust-pct" style="color:#8B5CF6">阅读理解</span>
+            </div>
         </div>
     `;
 
@@ -1795,6 +2416,9 @@ function showStats() {
 window.onload = () => {
     initSidebar();
     updateStatsBar();
+    // Sync shuffle toggle with saved preference
+    const toggle = document.getElementById('shuffle-toggle-input');
+    if (toggle) toggle.checked = shuffleOptions;
     showWelcome();
 };
 </script>
