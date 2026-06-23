@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语听力复习系统</title>
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-light: #818CF8;
+            --primary-dark: #4F46E5;
+            --primary-bg: #EEF2FF;
+            --success: #10B981;
+            --success-bg: #ECFDF5;
+            --error: #EF4444;
+            --error-bg: #FEF2F2;
+            --warning: #F59E0B;
+            --warning-bg: #FFFBEB;
+            --bg: #F0F2F5;
+            --card: #FFFFFF;
+            --text: #1E293B;
+            --text-secondary: #64748B;
+            --border: #E2E8F0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.03);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.2s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ===== Sidebar ===== */
+        .sidebar {
+            width: 280px;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px 16px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.8rem;
+            opacity: 0.85;
+        }
+
+        .sidebar-actions {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .action-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn.primary { background: var(--primary); color: white; }
+        .action-btn.primary:hover { background: var(--primary-dark); }
+        .action-btn.secondary { background: var(--primary-bg); color: var(--primary); }
+        .action-btn.secondary:hover { background: #DDD6FE; }
+        .action-btn.warning { background: var(--warning-bg); color: #B45309; }
+        .action-btn.warning:hover { background: #FDE68A; }
+        .action-btn.success { background: var(--success-bg); color: #047857; }
+        .action-btn.success:hover { background: #A7F3D0; }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 2px; }
+
+        .nav-group { margin-bottom: 2px; }
+
+        .nav-group-header {
+            padding: 10px 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition);
+            user-select: none;
+        }
+
+        .nav-group-header:hover { background: #F8FAFC; }
+
+        .nav-group-header .arrow {
+            transition: transform 0.2s;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .nav-group-header.collapsed .arrow { transform: rotate(-90deg); }
+
+        .nav-group-items { overflow: hidden; }
+
+        .nav-item {
+            padding: 8px 20px 8px 36px;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover { background: #F8FAFC; color: var(--text); }
+        .nav-item.active {
+            background: var(--primary-bg);
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-item .count {
+            font-size: 0.7rem;
+            background: #F1F5F9;
+            padding: 2px 7px;
+            border-radius: 10px;
+            color: var(--text-secondary);
+        }
+
+        .nav-item.active .count { background: #C7D2FE; color: var(--primary-dark); }
+
+        /* ===== Main Content ===== */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            padding: 16px 32px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .topbar-left h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .topbar-left p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: #F1F5F9;
+            border-radius: var(--radius-sm);
+            padding: 3px;
+        }
+
+        .mode-btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-item .stat-value {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-item .stat-value.success { color: var(--success); }
+        .stat-item .stat-value.error { color: var(--error); }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px;
+        }
+
+        .content-area::-webkit-scrollbar { width: 6px; }
+        .content-area::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+
+        /* ===== Welcome Page ===== */
+        .welcome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100%;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .welcome-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .welcome h2 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: var(--text-secondary);
+            max-width: 500px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .welcome-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .welcome-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .welcome-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .welcome-card .wc-icon { font-size: 2rem; margin-bottom: 10px; }
+        .welcome-card h3 { font-size: 0.95rem; margin-bottom: 4px; }
+        .welcome-card p { font-size: 0.78rem; color: var(--text-secondary); margin: 0; }
+
+        /* ===== Question Cards ===== */
+        .question-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .question-card:hover { box-shadow: var(--shadow-md); }
+
+        .q-header {
+            padding: 16px 20px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .q-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--primary-bg);
+            color: var(--primary);
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        .q-tag {
+            font-size: 0.72rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: #F1F5F9;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .q-body { padding: 16px 20px; }
+
+        .options-list { list-style: none; }
+
+        .option-item {
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .option-item:last-child { margin-bottom: 0; }
+        .option-item:hover:not(.disabled) {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .option-letter {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #F1F5F9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .option-item:hover:not(.disabled) .option-letter {
+            background: var(--primary-bg);
+            color: var(--primary);
+        }
+
+        .option-item.disabled { pointer-events: none; }
+
+        .option-item.correct {
+            background: var(--success-bg);
+            border-color: var(--success);
+        }
+
+        .option-item.correct .option-letter {
+            background: var(--success);
+            color: white;
+        }
+
+        .option-item.wrong {
+            background: var(--error-bg);
+            border-color: var(--error);
+        }
+
+        .option-item.wrong .option-letter {
+            background: var(--error);
+            color: white;
+        }
+
+        .option-item.selected-correct {
+            background: var(--success-bg);
+            border-color: var(--success);
+        }
+
+        .option-item.selected-correct .option-letter {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Study mode - show correct answer highlight */
+        .study-mode .option-item.correct-answer {
+            background: var(--success-bg);
+            border-color: var(--success);
+        }
+
+        .study-mode .option-item.correct-answer .option-letter {
+            background: var(--success);
+            color: white;
+        }
+
+        .feedback-area {
+            margin: 0 20px 16px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            line-height: 1.5;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .feedback-area.show { display: block; }
+        .feedback-correct { background: var(--success-bg); border-left: 4px solid var(--success); }
+        .feedback-wrong { background: var(--error-bg); border-left: 4px solid var(--error); }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== Mock Exam ===== */
+        .exam-header {
+            background: linear-gradient(135deg, var(--primary), #7C3AED);
+            color: white;
+            padding: 24px 32px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .exam-header h3 { font-size: 1.1rem; margin-bottom: 4px; }
+        .exam-header p { font-size: 0.82rem; opacity: 0.9; }
+
+        .exam-timer {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .exam-progress {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-bg {
+            height: 8px;
+            background: #E2E8F0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        .exam-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            padding: 12px 0 8px;
+            border-bottom: 2px solid var(--primary-bg);
+            margin-bottom: 16px;
+            margin-top: 8px;
+        }
+
+        .exam-submit-area {
+            text-align: center;
+            padding: 32px 0;
+        }
+
+        .submit-btn {
+            padding: 14px 48px;
+            background: linear-gradient(135deg, var(--primary), #7C3AED);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 14px rgba(99,102,241,0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99,102,241,0.4);
+        }
+
+        /* ===== Result Page ===== */
+        .result-page {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .result-score {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-weight: 700;
+        }
+
+        .result-score.excellent {
+            background: linear-gradient(135deg, #10B981, #34D399);
+            color: white;
+        }
+
+        .result-score.good {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+
+        .result-score.poor {
+            background: linear-gradient(135deg, var(--error), #F87171);
+            color: white;
+        }
+
+        .result-score .score-num { font-size: 2.8rem; }
+        .result-score .score-label { font-size: 0.85rem; opacity: 0.9; }
+
+        .result-details {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        .result-detail-item {
+            text-align: center;
+        }
+
+        .result-detail-item .rd-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .result-detail-item .rd-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* ===== Statistics Page ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stats-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .stats-card h4 {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stats-card .sc-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .stats-card .sc-sub {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .unit-stats-table {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .unit-stats-table h3 {
+            padding: 16px 20px;
+            font-size: 0.95rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ust-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #F8FAFC;
+            font-size: 0.85rem;
+        }
+
+        .ust-row:last-child { border-bottom: none; }
+
+        .ust-name { flex: 1; font-weight: 600; }
+
+        .ust-bar {
+            width: 120px;
+            height: 6px;
+            background: #E2E8F0;
+            border-radius: 3px;
+            margin: 0 16px;
+            overflow: hidden;
+        }
+
+        .ust-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .ust-pct {
+            width: 50px;
+            text-align: right;
+            font-weight: 700;
+            font-size: 0.82rem;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .sidebar { width: 220px; }
+            .content-area { padding: 16px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .welcome-cards { grid-template-columns: 1fr; }
+        }
+
+        /* ===== Scrollbar for sidebar ===== */
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 2px; }
+
+        /* ===== Reset button ===== */
+        .reset-btn {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .reset-btn:hover { border-color: var(--error); color: var(--error); }
+
+        /* ===== Exam option selected ===== */
+        .option-item.exam-selected {
+            background: var(--primary-bg);
+            border-color: var(--primary);
+        }
+
+        .option-item.exam-selected .option-letter {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ===== Translation Styles ===== */
+        .option-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .option-translation {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .trans-list {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed #E2E8F0;
+        }
+
+        .trans-line {
+            padding: 3px 0;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .trans-letter {
+            font-weight: 700;
+            color: var(--text-secondary);
+            min-width: 18px;
+        }
+
+        .trans-letter.trans-correct {
+            color: var(--success);
+        }
+
+        .trans-zh {
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+        }
+
+        /* ===== Chapter Actions Bar ===== */
+        .chapter-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .chapter-actions .ca-info {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .chapter-actions .ca-info strong {
+            color: var(--text);
+        }
+
+        .clear-progress-btn {
+            padding: 6px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            background: white;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .clear-progress-btn:hover {
+            border-color: var(--error);
+            color: var(--error);
+            background: var(--error-bg);
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h1>English Review</h1>
+        <p>英语听力复习系统 · 6 Units</p>
+    </div>
+    <div class="sidebar-actions">
+        <button class="action-btn primary" onclick="startMockExam()">📝 模拟试卷</button>
+        <button class="action-btn secondary" onclick="startRandomQuiz()">🎲 随机练习 (10题)</button>
+        <button class="action-btn success" onclick="showStats()">📊 学习统计</button>
+        <button class="action-btn warning" onclick="showWelcome()">🏠 首页</button>
+    </div>
+    <div class="sidebar-nav" id="sidebar-nav"></div>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <div class="topbar-left">
+            <h2 id="topbar-title">英语听力复习系统</h2>
+            <p id="topbar-subtitle">选择章节或开始练习</p>
+        </div>
+        <div class="topbar-right">
+            <div class="mode-toggle" id="mode-toggle">
+                <button class="mode-btn active" onclick="setMode('quiz')" id="mode-quiz">答题</button>
+                <button class="mode-btn" onclick="setMode('study')" id="mode-study">学习</button>
+            </div>
+            <div class="stats-bar" id="stats-bar">
+                <div class="stat-item"><span>已答</span> <span class="stat-value" id="stat-answered">0</span></div>
+                <div class="stat-item"><span>正确</span> <span class="stat-value success" id="stat-correct">0</span></div>
+                <div class="stat-item"><span>正确率</span> <span class="stat-value" id="stat-rate">0%</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="content-area" id="content-area"></div>
+</div>
+
+<script>
+// ==================== COMPLETE QUESTION BANK ====================
+const BANK = {
+"Unit 1": {
+"Section A": [
+{a:3, o:["A. No, it's open only to teachers and postgraduates.","B. Yes, he can study there if he is writing a research paper.","C. Yes, because he is a senior student.","D. Yes, but he needs the approval by his professor."], t:["不，它只对教师和研究生开放。","是的，如果他正在写研究论文，可以在那里学习。","是的，因为他是高年级学生。","是的，但他需要教授的批准。"]},
+{a:1, o:["A. The apartment is better furnished.","B. She prefers to live in a quiet place.","C. It's less expensive to live in an apartment.","D. She finds her roommates difficult to get along with."], t:["公寓的家具更好。","她更喜欢住在安静的地方。","住公寓更便宜。","她觉得室友很难相处。"]},
+{a:0, o:["A. She is going to change the time for the trip.","B. She hasn't decided where to go next month.","C. She can't afford the plane ticket for the trip.","D. She will manage to leave this month."], t:["她打算改变旅行的时间。","她还没决定下个月去哪里。","她买不起旅行的机票。","她会设法这个月出发。"]},
+{a:0, o:["A. The train is late for some reasons.","B. There are too many people on the train.","C. There are no magazines on the train.","D. The train will arrive on time."], t:["火车因为某些原因晚点了。","火车上人太多了。","火车上没有杂志。","火车会准时到达。"]},
+{a:0, o:["A. The air is polluted.","B. The people there are terrible.","C. It's too windy.","D. The beaches are dirty."], t:["空气被污染了。","那里的人很糟糕。","风太大了。","海滩很脏。"]},
+{a:0, o:["A. He meant she should make a phone call if anything went wrong.","B. He was sure that her car would not have any trouble.","C. He was afraid something would go wrong with her car.","D. He promised to give her help."], t:["他的意思是如果出了什么问题她应该打电话。","他确信她的车不会出任何问题。","他担心她的车会出问题。","他承诺会帮助她。"]},
+{a:1, o:["A. She accepted their request.","B. She rejected their request.","C. She agreed to consider their request.","D. She asked them to come with the other ones."], t:["她接受了他们的请求。","她拒绝了他们的请求。","她同意考虑他们的请求。","她让他们和其他人一起来。"]},
+{a:1, o:["A. Six.","B. Seven.","C. Eight.","D. Nine."], t:["六个。","七个。","八个。","九个。"]},
+{a:2, o:["A. Getting extra credits.","B. The requirements of an M.A. degree.","C. Taking more optional courses.","D. The credit hours required for an M.A. degree."], t:["获得额外学分。","硕士学位的要求。","选修更多选修课。","硕士学位所需的学时数。"]},
+{a:1, o:["A. He doesn't think it necessary to refuel the car.","B. He can manage to get the gasoline they need.","C. He hopes the woman will help him select a fuel.","D. He thinks it is difficult to get fuel for the car."], t:["他觉得没必要给车加油。","他能设法弄到他们需要的汽油。","他希望女士帮他选择燃料。","他觉得很难给车弄到燃料。"]}
+],
+"Section B - Passage 1": [
+{a:3, o:["A. Health.","B. People's length of life","C. Money-related matter.","D. Marriage."], t:["健康。","人的寿命","与金钱有关的事。","婚姻。"]},
+{a:0, o:["A. One who tends to agree with popular beliefs.","B. A person who works at a hospital.","C. Another palm reader.","D. A business person."], t:["倾向于认同流行观点的人。","在医院工作的人。","另一个看手相的人。","一个商人。"]},
+{a:1, o:["A. Because he believed in the claims of palm readers.","B. Because he wanted to show there was no relation between the length of the lifeline and the length of life.","C. Because he felt it would be an interesting scientific discovery.","D. Because he wanted to gather some data about his patients."], t:["因为他相信看手相者的说法。","因为他想证明生命线的长度与寿命之间没有关系。","因为他觉得这会是一个有趣的科学发现。","因为他想收集一些关于病人的数据。"]},
+{a:1, o:["A. The changes caused by aging.","B. One's way of life.","C. One's understanding of the human physiological structure.","D. The size of one's hands."], t:["衰老引起的变化。","一个人的生活方式。","一个人对人体生理结构的理解。","一个人手的大小。"]},
+{a:2, o:["A. The speaker seems to know a great deal about palm reading.","B. The speaker seems to know nothing about palm reading.","C. The speaker doesn't seem to be a believer in palm reading.","D. The speaker seems to be a believer in palm reading."], t:["说话者似乎对看手相了解很多。","说话者似乎对看手相一无所知。","说话者似乎不是看手相的信徒。","说话者似乎是看手相的信徒。"]}
+],
+"Section B - Passage 2": [
+{a:2, o:["A. Monkeys that have AIDS or other diseases.","B. Monkeys that can live beyond the age of 50.","C. Monkeys that have been used for medical research.","D. All of the animals that are indicated in the other three choices."], t:["患有艾滋病或其他疾病的猴子。","能活过50岁的猴子。","被用于医学研究的猴子。","其他三个选项中提到的所有动物。"]},
+{a:1, o:["A. Because scientists and researchers demand it.","B. Because it wants to treat laboratory animals more humanely.","C. Because it wishes to keep the aging animals from dying.","D. Because it has a special fund for doing so."], t:["因为科学家和研究人员要求这样做。","因为它想更人道地对待实验动物。","因为它希望防止年老的动物死去。","因为它有专门的资金来做这件事。"]},
+{a:0, o:["A. They are no longer well treated when they have been used.","B. They are generally taken good care of in old age.","C. They are killed for research purposes.","D. They are sent back to their natural living environment."], t:["它们被使用后就不再受到良好对待了。","它们在晚年通常得到很好的照顾。","它们因研究目的被杀。","它们被送回自然生活环境。"]},
+{a:0, o:["A. It is a rare phenomenon.","B. It is quite common nowadays.","C. It is an extremely strange thing to do.","D. It is absolutely unnecessary."], t:["这是一种罕见的现象。","如今这很常见。","这是一件极其奇怪的事。","这完全没必要。"]},
+{a:3, o:["A. The passage doesn't mention it.","B. They would most likely lose money.","C. They would be highly profitable.","D. They are well planned."], t:["文章没有提到。","他们很可能会亏钱。","他们会非常有利可图。","它们规划得很好。"]}
+],
+"Follow up - 第一组": [
+{a:1, o:["A. He has only one hobby and no bad hobbies.","B. He thinks he can learn skills from good hobbies.","C. He has both bad hobbies and good ones.","D. He thinks one can turn bad hobbies into good ones."], t:["他只有一个爱好，没有不良爱好。","他认为可以从好的爱好中学到技能。","他既有不良爱好也有好的爱好。","他认为人可以把不良爱好变成好的爱好。"]},
+{a:2, o:["A. Stephen is good at taking account of everything.","B. Stephen's babies are interested in collecting coins.","C. Stephen learns to be systematic from his hobby.","D. Stephen collects coins because they are valuable."], t:["斯蒂芬善于把每件事都考虑在内。","斯蒂芬的孩子们对收集硬币感兴趣。","斯蒂芬从他的爱好中学会了有条理。","斯蒂芬收集硬币是因为它们有价值。"]},
+{a:3, o:["A. Roy often empties his bag when he returns home.","B. Roy is trying to persuade Carol to go fishing with him.","C. Roy is only interested in catching fish.","D. Roy's real interest in fishing is sitting alone and doing nothing."], t:["罗伊回家时经常清空他的包。","罗伊正试图说服卡罗尔和他一起去钓鱼。","罗伊只对钓鱼感兴趣。","罗伊钓鱼的真正兴趣是独自坐着什么都不做。"]},
+{a:1, o:["A. The farmer makes robots without much knowledge about high-tech.","B. The farmer has held on to his hobby even though he met with great difficulties.","C. The farmer's hobby has brought great changes to his village.","D. The farmer started his hobby at the age of 44."], t:["这个农民没有多少高科技知识就制造了机器人。","这个农民尽管遇到了很大的困难，仍然坚持他的爱好。","这个农民的爱好给他的村庄带来了巨大的变化。","这个农民在44岁时开始了他的爱好。"]},
+{a:3, o:["A. She thinks drug addiction is the most dangerous.","B. She thinks Internet addiction is the most harmful.","C. She thinks addictions that make you trash are the worst.","D. She thinks every addiction is as bad as the other."], t:["她认为毒瘾是最危险的。","她认为网瘾是最有害的。","她认为让人变得颓废的瘾是最糟糕的。","她认为每种瘾都一样糟糕。"]}
+],
+"Follow up - 第二组": [
+{a:3, o:["A. Mark is a poker addict.","B. Mark is obsessed with online gambling.","C. Mark is fond of making friends on the Internet.","D. Mark is addicted to online games."], t:["马克是个扑克迷。","马克沉迷于网络赌博。","马克喜欢在网上交朋友。","马克沉迷于网络游戏。"]},
+{a:2, o:["A. Ron doesn't like any games.","B. Ron thinks it's OK to play games for money.","C. Ron is not a serious gaming addict.","D. Ron loves online poker games."], t:["罗恩不喜欢任何游戏。","罗恩认为玩游戏赌钱是可以的。","罗恩不是一个严重的游戏瘾者。","罗恩喜欢在线扑克游戏。"]},
+{a:2, o:["A. Gloria thinks it's no big deal for Mark to be addicted to games.","B. Gloria is afraid that Mark will get addicted to online gambling.","C. Gloria hopes Mark can control himself playing games.","D. Gloria wishes Mark can learn more from the games he plays."], t:["格洛丽亚认为马克沉迷游戏没什么大不了的。","格洛丽亚担心马克会沉迷于网络赌博。","格洛丽亚希望马克能控制自己玩游戏。","格洛丽亚希望马克能从玩的游戏中学到更多。"]},
+{a:0, o:["A. Ron thinks gambling is more harmful than playing games.","B. Ron dislikes women addicted to playing games.","C. Ron thinks playing games surely leads to gambling.","D. Ron shows strong opposition to playing games."], t:["罗恩认为赌博比玩游戏更有害。","罗恩不喜欢沉迷于玩游戏的女性。","罗恩认为玩游戏一定会导致赌博。","罗恩对玩游戏表示强烈反对。"]},
+{a:0, o:["A. Some gaming addicts make friends when playing together.","B. Professional people are less likely to get addicted to games.","C. Only a small percentage of gamers are gambling.","D. There are more male addicts than female addicts."], t:["一些游戏瘾者在一起玩时交朋友。","专业人士不太可能对游戏上瘾。","只有一小部分游戏玩家在赌博。","男性瘾者比女性瘾者多。"]}
+]
+},
+
+"Unit 2": {
+"Section A": [
+{a:0, o:["A. The experience of visiting Japan should include eating Japanese food.","B. There are lots of McDonald's in their home country.","C. She's got fed up with hamburgers at her home county.","D. Hamburgers are available anytime at home."], t:["去日本旅行的体验应该包括吃日本料理。","他们国内有很多麦当劳。","她已经厌倦了家乡的汉堡包。","在家随时都能吃到汉堡包。"]},
+{a:3, o:["A. Discussing the possibility of taking some snapshots.","B. Making a comparison between the hall and the royal courts in the west.","C. Going ahead to the hall.","D. Sightseeing."], t:["讨论拍些照片的可能性。","将大厅与西方的皇家宫廷进行比较。","继续前往大厅。","观光。"]},
+{a:1, o:["A. A foreign guest and an airport clerk.","B. A foreign guest and his Chinese friend.","C. A foreign guest and a hotel porter.","D. Two travel mates."], t:["一位外宾和一位机场工作人员。","一位外宾和他的中国朋友。","一位外宾和一位酒店行李员。","两位旅行同伴。"]},
+{a:3, o:["A. The woman worries about failing the exam.","B. How to beat the panic in exams.","C. What happens in the exam shouldn't count that much.","D. The drawbacks of exam system."], t:["女士担心考试不及格。","如何克服考试中的恐慌。","考试中发生的事不应该那么重要。","考试制度的弊端。"]},
+{a:2, o:["A. Travelling by rail is the last thing she enjoys.","B. Travelling by road is the last thing she enjoys.","C. Travelling by air is the last thing she enjoys.","D. Travelling by sea is the last thing she enjoys."], t:["坐火车旅行是她最不喜欢的事。","坐汽车旅行是她最不喜欢的事。","坐飞机旅行是她最不喜欢的事。","坐船旅行是她最不喜欢的事。"]},
+{a:2, o:["A. The size of the tour group.","B. The weather of the destination.","C. The cost of the trip.","D. Some information about Shangri-La."], t:["旅行团的大小。","目的地的天气。","旅行的费用。","一些关于香格里拉的信息。"]},
+{a:2, o:["A. They are reading ads for interesting places.","B. They are enjoying different kinds of wild animals in the jungle.","C. They are planning a vacation.","D. They are enjoying snowflakes on the mountain."], t:["他们在阅读有趣地方的广告。","他们在丛林中欣赏各种野生动物。","他们在计划度假。","他们在山上欣赏雪花。"]},
+{a:2, o:["A. Holidays are only relaxation.","B. Holidays have taken up too much of people's working time.","C. People should live a life as it instead of taking holiday as an escape.","D. Only those hard-working people deserve holidays."], t:["假期只是放松。","假期占用了人们太多的工作时间。","人们应该正常生活，而不是把假期当作逃避。","只有努力工作的人才配享受假期。"]},
+{a:3, o:["A. Given enough time and money, she'd go to the Caribbean in summer.","B. Given enough time and money, she'd go to Scandinavia in winter.","C. Given enough time and money, she'd travel about in London in autumn.","D. Given enough time and money, she'd tour round Britain in spring."], t:["如果有足够的时间和钱，她夏天会去加勒比海。","如果有足够的时间和钱，她冬天会去斯堪的纳维亚。","如果有足够的时间和钱，她秋天会在伦敦旅行。","如果有足够的时间和钱，她春天会环游英国。"]},
+{a:3, o:["A. On the fifth of August.","B. In winter.","C. In a few days.","D. On the 19th of August."], t:["8月5日。","在冬天。","几天后。","8月19日。"]}
+],
+"Section B - Passage 1": [
+{a:2, o:["A. Tips on how to better understand the new culture.","B. Tips on how to pack for your holidays.","C. Tips on how to make your holidays most enjoyable.","D. Tips on how to find the most precious souvenirs."], t:["关于如何更好理解新文化的建议。","关于如何为假期打包行李的建议。","关于如何让假期最愉快的建议。","关于如何找到最珍贵纪念品的建议。"]},
+{a:1, o:["A. Pack adaptable clothes only.","B. Pack light and right.","C. Prepare a carry-on bag.","D. Cram everything needed on the trip."], t:["只带适应性强的衣服。","轻装简行，恰到好处。","准备一个随身包。","把旅行需要的所有东西都塞进去。"]},
+{a:1, o:["A. When in Roman do as the Romans do.","B. Open yourself up to the locals.","C. Seaside is usually a good choice for vacation.","D. The hotel clerk is usual a good information source."], t:["入乡随俗。","向当地人敞开心扉。","海边通常是度假的好选择。","酒店前台通常是很好的信息来源。"]},
+{a:2, o:["A. To fully experience the new culture.","B. To relax oneself.","C. To make new friends.","D. To strengthen family ties."], t:["充分体验新文化。","放松自己。","结交新朋友。","增进家庭纽带。"]}
+],
+"Section B - Passage 2": [
+{a:0, o:["A. The natural wonders in Yellowstone National Park.","B. The natural wonders in the Grand Canyon.","C. Top attractions in Mt. McKinley National Park.","D. Tremendous variety of wildlife in Yellowstone National Park."], t:["黄石国家公园的自然奇观。","大峡谷的自然奇观。","麦金利山国家公园的顶级景点。","黄石国家公园种类繁多的野生动物。"]},
+{a:2, o:["A. Old Faithful is the largest geyser in the country.","B. Tower Falls can shoot water high into the sky.","C. The geysers are caused by volcanic activities.","D. The water flowing from waterfalls forms beautiful steaming pools."], t:["老忠实泉是全国最大的间歇泉。","塔瀑可以将水射向高空。","间歇泉是由火山活动引起的。","瀑布流出的水形成了美丽的蒸汽池。"]},
+{a:1, o:["A. It's located in Alaska.","B. It's located in the western part of the country.","C. It's located in the Florida.","D. It's located in the southern part of the country."], t:["它位于阿拉斯加。","它位于该国的西部。","它位于佛罗里达。","它位于该国的南部。"]},
+{a:1, o:["A. It is broadcast every day.","B. It is broadcast every week.","C. It is broadcast every other day.","D. It is broadcast every other week."], t:["它每天播出。","它每周播出。","它隔天播出。","它隔周播出。"]}
+],
+"Follow up - 第一套": [
+{a:0, o:["A. Husband and wife.","B. Customer and sales girl.","C. Father and daughter.","D. Co-workers."], t:["丈夫和妻子。","顾客和售货员。","父亲和女儿。","同事。"]},
+{a:3, o:["A. No one needs a vacation as much as he does.","B. He has just had a vacation.","C. A vacation is incredibly good for a change.","D. A vacation is even more exhausting."], t:["没有人比他更需要假期了。","他刚度过假。","度假对于换换心情来说非常好。","度假甚至更让人疲惫。"]},
+{a:3, o:["A. The woman is preparing presents for her coach.","B. The woman is packing for her coach.","C. The woman is packing for a visit to her coach.","D. The woman is packing for her bus tour."], t:["女士正在为她的教练准备礼物。","女士正在为她的教练收拾行李。","女士正在为拜访她的教练收拾行李。","女士正在为她的巴士旅行收拾行李。"]},
+{a:1, o:["A. The bus should be kept in the museum.","B. The bus was too worn out and uncomfortable.","C. The man was taken to only one place to visit.","D. The bus was too old to be started."], t:["这辆巴士应该保存在博物馆里。","这辆巴士太破旧了，很不舒服。","男士只被带去了一个地方参观。","这辆巴士太旧了，无法启动。"]},
+{a:0, o:["A. 3 hours or so.","B. 9 hours or so.","C. 21 hours or so.","D. 5 hours or so."], t:["大约3小时。","大约9小时。","大约21小时。","大约5小时。"]}
+],
+"Follow up - 第二套": [
+{a:1, o:["A. There are a lot of restrictions on tourists.","B. There is a large variety of animals there.","C. It's the largest national park in the United States.","D. It's the most beautiful national park in the United States."], t:["对游客有很多限制。","那里有种类繁多的动物。","它是美国最大的国家公园。","它是美国最美丽的国家公园。"]},
+{a:3, o:["A. Tourists are not allowed to take wild animals out of the park.","B. Tourists are not allowed to feed wild animals.","C. Wild animals have been well protected in the park.","D. Tourists are not allowed to take pictures of wild animals there."], t:["游客不允许将野生动物带出公园。","游客不允许喂野生动物。","野生动物在公园里得到了很好的保护。","游客不允许在那里给野生动物拍照。"]},
+{a:3, o:["A. Go fishing.","B. Go hiking.","C. Go sightseeing.","D. Go horseback riding."], t:["去钓鱼。","去远足。","去观光。","去骑马。"]},
+{a:3, o:["A. It must be a famous dog.","B. It must be a famous rock.","C. It must be a famous tree.","D. It must be a famous geyser."], t:["它一定是一条著名的狗。","它一定是一块著名的岩石。","它一定是一棵著名的树。","它一定是一个著名的间歇泉。"]},
+{a:1, o:["A. Chatting around the campfire.","B. Putting out the campfire.","C. Feeding the bear cub.","D. Making plans for tomorrow."], t:["围着篝火聊天。","扑灭篝火。","喂小熊。","制定明天的计划。"]}
+]
+},
+
+"Unit 3": {
+"Section A": [
+{a:2, o:["A. It's impossible for the professor to allow the man to put off the paper.","B. The man needs to be careful when taking chances.","C. Don't be so sure that the professor will allow the man to postpone the paper.","D. It's a good idea for the man to make a schedule to finish the paper."], t:["教授不可能允许那位男士推迟交论文。","男士在冒险时需要小心。","不要太确定教授会允许那位男士推迟论文。","男士制定一个完成论文的时间表是个好主意。"]},
+{a:0, o:["A. To be a part-time English teacher.","B. To make preparation for term examinations.","C. To study a community service program.","D. To immigrate to a foreign country."], t:["做一名兼职英语老师。","为期末考试做准备。","学习一个社区服务项目。","移民到国外。"]},
+{a:3, o:["A. The class provides lots of knowledge.","B. They get hurt in the leg in the class.","C. The lose freedom to move in the class.","D. They can't bear the long hours of the lecture."], t:["这门课提供了很多知识。","他们在课上腿部受伤了。","他们在课上失去了活动的自由。","他们无法忍受长时间的讲座。"]},
+{a:0, o:["A. It is hard for her to deal with six courses simultaneously.","B. She may not be able to pass BEC test.","C. She needs to stop working so hard and to take a rest.","D. It would be better for her not to eat while taking courses."], t:["她很难同时应付六门课程。","她可能无法通过BEC考试。","她需要停止这么辛苦地工作，休息一下。","她上课时最好不要吃东西。"]},
+{a:3, o:["A. He will have extra time to play computer games later.","B. His courses are too hard for him to handle.","C. She will help the man to prepare for his exams.","D. He should have spent more time working on his courses."], t:["他以后会有额外的时间玩电脑游戏。","他的课程太难了，他应付不了。","她会帮男士准备考试。","他本应该花更多时间在课程上。"]},
+{a:0, o:["A. Take some time to make his decision.","B. Talk to the student committee later.","C. Cancel his membership in the committee.","D. Find the woman a position in the committee."], t:["花些时间做决定。","稍后和学生委员会谈谈。","取消他在委员会的成员资格。","为女士在委员会中找一个职位。"]},
+{a:2, o:["A. Because the campus is too large for her.","B. Because the people are talkative on campus.","C. Because she likes to live with outgoing people.","D. Because she was struck by someone there."], t:["因为校园对她来说太大了。","因为校园里的人太健谈了。","因为她喜欢和外向的人住在一起。","因为她在那里被人打了。"]},
+{a:0, o:["A. To let her make a thirty-minute preparation.","B. To help her repair the computer.","C. To cancel the oral presentation.","D. To allow her to refer to her notes."], t:["让她做三十分钟的准备。","帮她修电脑。","取消口头报告。","允许她参考笔记。"]},
+{a:2, o:["A. She should cancel her ticket order.","B. Pick up her tickets at the ticket office.","C. Go online to order her ticket.","D. Go on calling the ticket office."], t:["她应该取消订票。","去售票处取票。","上网订票。","继续打电话给售票处。"]},
+{a:0, o:["A. To take a rest after long time of studying.","B. To study hard and effectively.","C. To find out why he is different from others.","D. To study outside the room."], t:["长时间学习后休息一下。","努力有效地学习。","找出他为什么和别人不同。","在房间外面学习。"]}
+],
+"Section B - Passage 1": [
+{a:3, o:["A. It is a speech about how to make a movie by club members.","B. It is a film review made by a movie club member.","C. It is a project report about how to set up a movie club.","D. It is an introductory remark of the movie club."], t:["这是关于俱乐部成员如何制作电影的演讲。","这是电影俱乐部成员写的影评。","这是关于如何建立电影俱乐部的项目报告。","这是电影俱乐部的开场介绍。"]},
+{a:0, o:["A. He is the president of the Movie Club.","B. He is a student of the Department of Art.","C. He is a professional cameraman.","D. He is an editor of a journal."], t:["他是电影俱乐部的主席。","他是艺术系的学生。","他是专业摄影师。","他是一本期刊的编辑。"]},
+{a:1, o:["A. The Movie Club is the oldest club at school.","B. The Movie Club is three years old.","C. The Movie Club has a film show every night.","D. The Movie Club activities are always open to every student."], t:["电影俱乐部是学校最古老的社团。","电影俱乐部成立三年了。","电影俱乐部每晚都有电影放映。","电影俱乐部的活动总是对所有学生开放。"]},
+{a:2, o:["A. Some club members offer the equipment for free.","B. They rent the equipment from the Students' Center.","C. The Art Department provides some free equipment.","D. They borrow the equipment from the computer lab."], t:["一些俱乐部成员免费提供设备。","他们从学生中心租用设备。","艺术系提供一些免费设备。","他们从计算机实验室借用设备。"]},
+{a:2, o:["A. To write a letter to the journal.","B. To go the editing studio of the Art Department.","C. To go to the computer lab on Saturday nights.","D. To go to the Art Department office on Saturdays."], t:["给期刊写一封信。","去艺术系的编辑工作室。","周六晚上去计算机实验室。","周六去艺术系办公室。"]}
+],
+"Section B - Passage 2": [
+{a:1, o:["A. He always stays with his parents.","B. He has his classes at home.","C. He has gone to college.","D. His intellectual level is higher than that of normal kids."], t:["他总是和父母待在一起。","他在家上课。","他已经上大学了。","他的智力水平比正常孩子高。"]},
+{a:0, o:["A. The tuition is a burden on his family.","B. Jack's parents think homeschooling is more effective.","C. Jack finds it hard to study well in traditional classes.","D. It offers a chance for family members to get together."], t:["学费是他家庭的负担。","杰克的父母认为家庭教育更有效。","杰克觉得在传统课堂上很难学好。","这提供了家庭成员聚在一起的机会。"]},
+{a:0, o:["A. Libraries and the Internet.","B. The old textbooks from Jack's mother.","C. The small library belonging to Jack's uncle.","D. The school where Jack's mother works."], t:["图书馆和互联网。","杰克母亲的旧教科书。","杰克叔叔的小图书馆。","杰克母亲工作的学校。"]},
+{a:0, o:["A. He is worried that Jack might lack social skills.","B. He supports Jack's parents' decision.","C. He thinks Jack may not win competition.","D. He is not sure of Jack's future."], t:["他担心杰克可能缺乏社交技能。","他支持杰克父母的决定。","他认为杰克可能赢不了竞争。","他对杰克的未来不确定。"]},
+{a:2, o:["A. He knows clearly what will happen to his education.","B. He is excited about studying at home.","C. He is not certain whether he can do well at home.","D. He prefers traditional schools to homeschooling."], t:["他清楚地知道他的教育将会怎样。","他对在家学习感到兴奋。","他不确定自己在家能否学得好。","他更喜欢传统学校而不是家庭教育。"]}
+],
+"Follow up - 第一套": [
+{a:3, o:["A. He is taking an entrance examination.","B. He is working as an engineer.","C. He is receiving his Bachelor's degree.","D. He is at a job interview."], t:["他正在参加入学考试。","他正在做工程师。","他正在获得学士学位。","他正在参加求职面试。"]},
+{a:0, o:["A. He suggests the woman keep trying until she gets it right.","B. He suggests the woman take a break.","C. He suggests he may be able to help her practise her lines.","D. He suggests that the woman give up if she is always having these problems."], t:["他建议女士继续尝试直到做对为止。","他建议女士休息一下。","他建议他可能可以帮她练习台词。","他建议如果女士总是遇到这些问题就放弃。"]},
+{a:1, o:["A. To ask for help from advanced learners.","B. To receive assistance from the teacher.","C. To study by himself in the lab.","D. To join in at the intermediate level."], t:["向高级学习者寻求帮助。","接受老师的帮助。","自己在实验室学习。","加入中级水平。"]},
+{a:3, o:["A. He has been teaching in high school for a long time.","B. He is completely lost in a foreign culture.","C. He thinks he will never get old.","D. He wants to keep learning all his life."], t:["他在高中教书已经很长时间了。","他在异国文化中完全迷失了。","他认为自己永远不会变老。","他想一辈子不断学习。"]},
+{a:2, o:["A. It will take them many years to get rich and famous.","B. There's a new school of artistic movement around the corner.","C. The man's idea is not feasible at all.","D. The man has gone mentally insane."], t:["他们需要很多年才能变得富有和出名。","一种新的艺术运动流派即将出现。","男士的想法根本不可行。","男士已经精神失常了。"]}
+],
+"Follow up - 第二套": [
+{a:1, o:["A. Hearing.","B. Smelling.","C. Touching.","D. Reading."], t:["听觉。","嗅觉。","触觉。","阅读。"]},
+{a:3, o:["A. It means getting absorbed in books.","B. It means observing to get new information.","C. It means practising to learn knowledge.","D. It means acquiring knowledge in one's favourite way."], t:["它意味着沉浸在书本中。","它意味着通过观察获取新信息。","它意味着通过练习学习知识。","它意味着以自己最喜欢的方式获取知识。"]},
+{a:0, o:["A. Ted enjoys discussion with others.","B. Ted prefers reading to listening.","C. Ted likes to feel and experience.","D. Ted prefers taking notes."], t:["特德喜欢和别人讨论。","特德更喜欢阅读而不是听。","特德喜欢感受和体验。","特德更喜欢记笔记。"]},
+{a:2, o:["A. Because Mike often listens to the radio.","B. Because Mike can't concentrate on his studies.","C. Because Mike once took a computer apart to make observations.","D. Because Mike can remember what others say."], t:["因为迈克经常听广播。","因为迈克无法集中精力学习。","因为迈克曾经拆开一台电脑进行观察。","因为迈克能记住别人说的话。"]},
+{a:2, o:["A. Mike's learning style is to use his sense of touch to learn.","B. Lily herself is good at learning from books.","C. Different people should develop their own suitable learning styles.","D. Learning by discussion is more effective."], t:["迈克的学习风格是用触觉来学习。","莉莉本人擅长从书本中学习。","不同的人应该发展适合自己的学习风格。","通过讨论学习更有效。"]}
+],
+"Follow up - 第三套": [
+{a:2, o:["A. Because they were homeless children.","B. Because they wanted to be modern Crusoes.","C. Because they took part in a special hardship camp.","D. Because they were good students at school."], t:["因为他们是无家可归的孩子。","因为他们想成为现代鲁滨逊。","因为他们参加了一个特殊的吃苦夏令营。","因为他们是学校里的好学生。"]},
+{a:1, o:["A. Catching fish in the sea.","B. Growing vegetables.","C. Cooking meals.","D. Picking fruit."], t:["在海里捕鱼。","种蔬菜。","做饭。","摘水果。"]},
+{a:0, o:["A. Mountains that are far away.","B. Thick forests with dangerous animals.","C. Beautiful beaches.","D. Safe and open fields."], t:["远处的山脉。","有危险动物的茂密森林。","美丽的海滩。","安全开阔的田野。"]},
+{a:3, o:["A. It is a good idea to set up hardship camps to help local people develop their economy.","B. Children are expected to know how hard life is on the island.","C. Traditional education also includes such things as hardship camps.","D. Hardship camps can be an important part of an education for children."], t:["建立吃苦夏令营帮助当地人发展经济是个好主意。","孩子们应该知道岛上的生活有多艰苦。","传统教育也包括吃苦夏令营这样的事情。","吃苦夏令营可以成为儿童教育的重要组成部分。"]},
+{a:0, o:["A. They like the idea of organizing hardship camps and support it.","B. They think hardship camps are better than a normal education.","C. They feel they should make preparations for their children.","D. They are satisfied with the living conditions in such camps."], t:["他们喜欢组织吃苦夏令营的想法并支持它。","他们认为吃苦夏令营比正常教育更好。","他们觉得应该为孩子们做准备。","他们对这种夏令营的生活条件感到满意。"]}
+]
+},
+
+"Unit 4": {
+"Section A": [
+{a:2, o:["A. He is good at taking bags on the back.","B. He is good at teaching.","C. He is good at running.","D. He is good at winning competitions."], t:["他擅长背袋子。","他擅长教学。","他擅长跑步。","他擅长赢得比赛。"]},
+{a:0, o:["A. Find out if classes are cancelled.","B. Not go to classes tomorrow.","C. Turn on the radio.","D. Look to see if the storm has stopped."], t:["查看课程是否取消。","明天不去上课。","打开收音机。","看看暴风雨是否停了。"]},
+{a:1, o:["A. She should go home now to get the DVD.","B. She can return the DVD to Robert later.","C. She can borrow a DVD from Robert when she sees him in class.","D. She should not have taken Robert's DVD home with her."], t:["她现在应该回家拿DVD。","她可以稍后把DVD还给罗伯特。","她在课上见到罗伯特时可以向他借DVD。","她不该把罗伯特的DVD带回家。"]},
+{a:0, o:["A. Because he thinks the beer might be too expensive.","B. Because he has to study the history of cars.","C. Because he needs to return to the lab right now.","D. Because he wants to wait until the end of the term."], t:["因为他觉得啤酒可能太贵了。","因为他必须学习汽车的历史。","因为他需要马上回实验室。","因为他想等到学期末。"]},
+{a:0, o:["A. The man missed the meeting yesterday.","B. The man will fail the course.","C. The man has received the handout.","D. The man didn't attend the group discussion."], t:["男士错过了昨天的会议。","男士这门课会不及格。","男士已经收到了讲义。","男士没有参加小组讨论。"]},
+{a:1, o:["A. Her parents let the girl do anything she wants.","B. Her parents set some limitation on the girls' freedom.","C. The girl thinks that her parents are too strict to her.","D. The girl is quite satisfied with her parents."], t:["她的父母让女孩做任何她想做的事。","她的父母对女孩的自由设定了一些限制。","女孩觉得父母对她太严格了。","女孩对她的父母很满意。"]},
+{a:0, o:["A. She will answer the man's questions.","B. She will conduct a survey with the man.","C. She will go into a shop.","D. She will interview the man."], t:["她会回答男士的问题。","她会和男士一起进行调查。","她会进一家商店。","她会采访男士。"]},
+{a:2, o:["A. Tests are unreliable in finding children's talents.","B. To develop children's talent is the most important thing.","C. Different children may be good in different fields.","D. It is a useful way to carry out tests in psychology research."], t:["测试在发现儿童天赋方面不可靠。","培养儿童的天赋是最重要的事情。","不同的孩子可能擅长不同的领域。","这是进行心理学研究测试的有用方法。"]},
+{a:1, o:["A. In Boston.","B. In Seattle.","C. Philadelphia.","D. In San Francisco."], t:["在波士顿。","在西雅图。","在费城。","在旧金山。"]},
+{a:3, o:["A. Two students in a dormitory.","B. An estate agent and a client.","C. A tour guide and a tourist.","D. A porter and customer coming to a hotel."], t:["宿舍里的两个学生。","房产中介和客户。","导游和游客。","行李员和来到酒店的顾客。"]}
+],
+"Section B - Passage 1": [
+{a:1, o:["A. Don't pay any attention to them.","B. Avoid staring at the audience's faces.","C. Try to make you voice as loud as possible","D. Try to control your own facial expression."], t:["不要理会他们。","避免盯着观众的脸看。","尽量让你的声音尽可能大","尽量控制你自己的面部表情。"]},
+{a:3, o:["A. A great speaker should say exactly as he write on the script.","B. A great speaker needs a guide to remind what is written on script.","C. There is not necessary to uses scripts during the speech-making.","D. A great speaker should not pay much attention to his scripts in hand."], t:["伟大的演讲者应该完全按照讲稿上写的说。","伟大的演讲者需要一个提醒者来提醒讲稿上写的内容。","演讲时没有必要使用讲稿。","伟大的演讲者不应该太在意手中的讲稿。"]},
+{a:3, o:["A. Female speakers need to have their long hair cut.","B. Speakers had better put their hands into pockets.","C. Speakers' speech should agree with the audience's appetite.","D. Speakers need to wear appropriate clothes in different situations."], t:["女性演讲者需要剪掉长发。","演讲者最好把手放进口袋里。","演讲者的演讲应该符合观众的口味。","演讲者需要在不同场合穿着合适的衣服。"]}
+],
+"Section B - Passage 2": [
+{a:2, o:["A. He likes to travel with a friend.","B. He likes to buy something in the station.","C. He likes to sit alone comfortably.","D. He likes to look after others' suitcases."], t:["他喜欢和朋友一起旅行。","他喜欢在车站买东西。","他喜欢独自舒适地坐着。","他喜欢照看别人的手提箱。"]},
+{a:0, o:["A. Because he didn't want the old man to sit beside him.","B. Because the seat belonged to his friend.","C. Because he had to put his suitcase on the seat.","D. Because something was wrong with the seat."], t:["因为他不想让老人坐在他旁边。","因为这个座位是他朋友的。","因为他必须把手提箱放在座位上。","因为座位有问题。"]},
+{a:3, o:["A. The old man stood somewhere in the train.","B. The old man waited until Mr. Morton's friend came back.","C. The old man put Mr. Morton's suitcase under the seat.","D. The old man took the seat beside Mr. Morton."], t:["老人站在火车的某个地方。","老人一直等到莫顿先生的朋友回来。","老人把莫顿先生的手提箱放在座位下面。","老人坐在了莫顿先生旁边。"]},
+{a:0, o:["A. He threw Mr. Morton's suitcase out of the window.","B. He threw his own suitcase out of the window.","C. He opened the suitcase lying on his seat.","D. He had the suitcase taken away from his seat."], t:["他把莫顿先生的手提箱扔出了窗外。","他把自己的手提箱扔出了窗外。","他打开了放在座位上的手提箱。","他让人把座位上的手提箱拿走了。"]},
+{a:1, o:["A. The old man returned the suitcase to Mr. Morton's friend.","B. The old man knew Mr. Morton had lied to him.","C. Mr. Morton's friend failed to catch the train.","D. Mr. Morton prevented the old man from taking the suitcase out."], t:["老人把手提箱还给了莫顿先生的朋友。","老人知道莫顿先生对他撒了谎。","莫顿先生的朋友没赶上火车。","莫顿先生阻止了老人把手提箱拿走。"]}
+],
+"Follow up - 第一套": [
+{a:0, o:["A. The woman is unhappy about too many advertisements on TV.","B. The man is complaining about difficulties in his daily life.","C. The woman is very interested in the advertisements around her.","D. The man dislikes TV advertisements as the woman does."], t:["女士对电视上太多广告感到不满。","男士在抱怨日常生活中的困难。","女士对周围的广告很感兴趣。","男士和女士一样不喜欢电视广告。"]},
+{a:2, o:["A. He is interested in the progress of architecture.","B. He is interested in writing the history of cities.","C. He is interested in the history of cities shown in pictures.","D. He is interested in giving lectures on photography."], t:["他对建筑的进步感兴趣。","他对撰写城市历史感兴趣。","他对照片中展示的城市历史感兴趣。","他对做摄影讲座感兴趣。"]},
+{a:3, o:["A. It is about how to give appropriate smiles at parties.","B. It is about how to overcome shyness in social life.","C. It is about cultural differences between English and Chinese people.","D. It is about personality evident in an individual's gestures."], t:["它是关于如何在聚会上得体地微笑。","它是关于如何克服社交生活中的害羞。","它是关于中英文化差异的。","它是关于个人手势中体现的个性。"]},
+{a:0, o:["A. The man is a Brazilian.","B. The man makes a habit of being late.","C. The man has a bad temper.","D. The man is rude to his friends."], t:["男士是巴西人。","男士养成了迟到的习惯。","男士脾气不好。","男士对朋友很粗鲁。"]},
+{a:0, o:["A. He wants to make his body stronger.","B. He wants to get the upper hand in a fight.","C. He wants to make friends with people in class.","D. He wants to learn more about Chinese culture."], t:["他想让身体更强壮。","他想在打斗中占上风。","他想和班上的人交朋友。","他想了解更多中国文化。"]}
+],
+"Follow up - 第二套": [
+{a:1, o:["A. Culture shock is caused by a disease one gets in a foreign country.","B. Culture shock is caused when you feel unfamiliar with the social environment.","C. Culture shock is caused by one's dissatisfaction with an occupation.","D. Culture shock is caused when one cannot understand a foreign language."], t:["文化冲击是由在国外感染疾病引起的。","文化冲击是当你对社交环境感到陌生时引起的。","文化冲击是由对职业的不满引起的。","文化冲击是当一个人无法理解外语时引起的。"]},
+{a:2, o:["A. He might act like a fish out of water.","B. He might lose interest in many things.","C. He might feel anxious, uneasy and frustrated.","D. He might make more purchases."], t:["他可能会表现得如鱼离水般不自在。","他可能会对很多事情失去兴趣。","他可能会感到焦虑、不安和沮丧。","他可能会买更多东西。"]},
+{a:3, o:["A. He thinks that the classes are not useful to foreigners at all.","B. He thinks one should look for a native as a tutor after class.","C. He thinks such classes can help one become broad-minded.","D. He thinks one cannot learn about local culture well enough through a class."], t:["他认为这些课程对外国人根本没用。","他认为课后应该找一个当地人当辅导老师。","他认为这样的课程可以帮助人变得心胸开阔。","他认为通过课堂无法很好地了解当地文化。"]},
+{a:0, o:["A. Most local customs are learned through social life.","B. None of the customs can be learnt in the classroom.","C. One can learn local customs only when one is broad-minded.","D. One must overcome anxiety before learning local customs."], t:["大多数当地习俗是通过社交生活学到的。","没有习俗可以在课堂上学到。","只有心胸开阔才能学习当地习俗。","必须克服焦虑才能学习当地习俗。"]},
+{a:1, o:["A. A foreigner can never enjoy local culture and life.","B. One can learn to be involved in a new culture step by step.","C. Anyone will soon get used to the new culture.","D. One will easily get sick when transplanted abroad suddenly."], t:["外国人永远无法享受当地文化和生活。","人可以逐步学会融入新文化。","任何人都会很快适应新文化。","突然被移居国外时很容易生病。"]}
+]
+},
+
+"Unit 5": {
+"Section A": [
+{a:1, o:["A. The woman enjoyed the movie very much.","B. The woman saw a horror movie.","C. The man asked the woman to be careful at night.","D. The man went to the show with the woman."], t:["女士非常喜欢这部电影。","女士看了一部恐怖片。","男士让女士晚上小心。","男士和女士一起去看演出了。"]},
+{a:1, o:["A. Whether to employ the woman.","B. Whether to take up the new job.","C. Whether to ask for a raise.","D. Whether to buy a new house."], t:["是否雇佣这位女士。","是否接受新工作。","是否要求加薪。","是否买新房子。"]},
+{a:3, o:["A. It will take about one month to repair the watch.","B. The woman should have saved more money.","C. It is a good idea to keep the old watch.","D. The watch is no longer worth repairing."], t:["修这块表大约需要一个月。","女士本应该多存些钱。","保留旧手表是个好主意。","这块表已经不值得修了。"]},
+{a:0, o:["A. It was probably Mr. Parkinson's phone number that the woman had written down.","B. It was just an hour ago that the man met Mr. Parkinson.","C. The woman forgot to write down the phone number.","D. The woman needed a sheet of paper to put down the number."], t:["女士写下的可能是帕金森先生的电话号码。","男士一小时前才遇到帕金森先生。","女士忘记写下电话号码了。","女士需要一张纸来记下号码。"]},
+{a:3, o:["A. Michele may have taken a wrong train.","B. Michele will miss the next conference.","C. Michele won't come to the conference.","D. Michele may be late for the opening speech."], t:["米歇尔可能坐错了火车。","米歇尔会错过下一次会议。","米歇尔不会来参加会议了。","米歇尔可能会迟到开幕演讲。"]},
+{a:3, o:["A. He likes the job of a dish-washer because it pays well.","B. He thinks it's important to have a good job from the beginning.","C. He hates to be a dish-washer because it's boring.","D. He would work as a dish-washer in summer if he has to."], t:["他喜欢洗碗工的工作因为薪水高。","他认为从一开始就有一份好工作很重要。","他讨厌做洗碗工因为很无聊。","如果不得已的话，他夏天会做洗碗工。"]},
+{a:3, o:["A. She'll go to her uncle's.","B. She has an appointment with her friend.","C. She'll have an appointment with her friend.","D. She'll have a visitor on Thursday."], t:["她会去她叔叔家。","她和朋友有个约会。","她将和朋友有个约会。","她周四会有访客。"]},
+{a:1, o:["A. Tony will see Margaret tomorrow evening.","B. Tony might be at home late tomorrow evening.","C. Tony and Margaret have decided to go on a holiday.","D. Tony asked the woman to come another time."], t:["托尼明晚会见玛格丽特。","托尼明晚可能很晚才到家。","托尼和玛格丽特已决定去度假。","托尼让女士改天再来。"]},
+{a:1, o:["A. They think cinemas are too far away from their homes.","B. They are disappointed with the films produced these days.","C. They both dislike films about adventure stories.","D. They both like the idea of going to the cinema at night."], t:["他们觉得电影院离家太远了。","他们对如今制作的电影感到失望。","他们都不喜欢冒险故事片。","他们都喜欢晚上去看电影的想法。"]},
+{a:2, o:["A. Because she didn't know how to use the new oven.","B. Because she wanted her refrigerator to be fixed.","C. Because there is something wrong with the oven.","D. Because there is something wrong with the food."], t:["因为她不知道如何使用新烤箱。","因为她想修冰箱。","因为烤箱出了问题。","因为食物出了问题。"]}
+],
+"Section B - Passage 1": [
+{a:3, o:["A. Because people don't use them as often as they did.","B. Because people take it for granted that they can afford them.","C. Because people's mind has changed.","D. Because people regard them as common necessities in life."], t:["因为人们不像以前那样经常使用它们了。","因为人们理所当然地认为自己负担得起。","因为人们的观念变了。","因为人们把它们视为生活中的常见必需品。"]},
+{a:0, o:["A. It will have become part of people's everyday life.","B. It will be as cheap as the telephone of today.","C. It will have lost its interest to people.","D. It will no longer be an infant."], t:["它将成为人们日常生活的一部分。","它将像今天的电话一样便宜。","它将失去人们对它的兴趣。","它将不再是婴儿期。"]},
+{a:1, o:["A. It has passed its infancy.","B. It is developing at a very rapid rate.","C. It has naturally moved more people together.","D. It is responding to the challenge of the world."], t:["它已经度过了婴儿期。","它正在以非常快的速度发展。","它自然地把更多的人聚集在一起。","它正在回应世界的挑战。"]},
+{a:3, o:["A. The development of the Internet will slow down.","B. It won't take long for the Internet to become part of people's lives.","C. The Internet will be able to link all people together.","D. People are usually pessimistic about the future."], t:["互联网的发展将会放缓。","互联网成为人们生活的一部分不会花太长时间。","互联网将能够把所有人联系在一起。","人们通常对未来持悲观态度。"]}
+],
+"Section B - Passage 2": [
+{a:3, o:["A. They begin by receiving on-the-job training.","B. The must learn several skills for the jobs.","C. They begin as ticket takers.","D. They attend Disney University."], t:["他们从接受在职培训开始。","他们必须为工作学习几种技能。","他们从检票员开始做起。","他们上迪士尼大学。"]},
+{a:1, o:["A. To learn all parts of the business.","B. To see that their guests enjoy themselves.","C. To be able to answer all kinds of questions.","D. To keep their important guests happy."], t:["了解业务的各个方面。","确保他们的客人玩得开心。","能够回答各种问题。","让重要的客人保持愉快。"]},
+{a:2, o:["A. To set a good example for employees.","B. To remind themselves of their beginnings at Disney.","C. To gain a better view of the company's objectives.","D. To replace employees on holiday."], t:["为员工树立好榜样。","提醒自己在迪士尼的起步。","更好地了解公司的目标。","替换休假的员工。"]},
+{a:0, o:["A. Tourists learn the history of Disney in its entertainment parks.","B. Disney attracts people from all over the world.","C. Parades are regularly held in Disney's entertainment parks.","D. Disney's managers are able to do most kinds of work in the Disney park."], t:["游客在迪士尼乐园了解迪士尼的历史。","迪士尼吸引了来自世界各地的人。","迪士尼乐园定期举行游行。","迪士尼的管理人员能够做迪士尼乐园里大多数种类的工作。"]},
+{a:3, o:["A. How Disney employees are trained.","B. The history and traditions of the Disney enterprises.","C. Why Disney enterprises make such a great profit.","D. The importance Disney places on serving people well."], t:["迪士尼员工是如何培训的。","迪士尼企业的历史和传统。","为什么迪士尼企业能获得如此大的利润。","迪士尼对良好服务人们的重视。"]}
+],
+"Follow up - 第一套": [
+{a:0, o:["A. She didn't go to the party yesterday.","B. She didn't remember seeing the man at the party.","C. She left the party before the man arrived.","D. She didn't want to see the man."], t:["她昨天没去参加聚会。","她不记得在聚会上见过那位男士。","她在男士到达之前就离开了聚会。","她不想见那位男士。"]},
+{a:2, o:["A. They didn't have enough time to get their seats on the plane.","B. The pilot had trouble starting the engine.","C. The engine started as soon as they got on the plane.","D. They were delayed at the airport."], t:["他们没有足够的时间在飞机上找到座位。","飞行员启动引擎遇到了困难。","他们一上飞机引擎就启动了。","他们在机场被延误了。"]},
+{a:2, o:["A. Jason will have to work a little harder.","B. She's certain he can work on something else.","C. Jason can take the test on another day.","D. Jason can skip the test and won't have to make it up."], t:["杰森必须再努力一点。","她确信他可以做别的事情。","杰森可以改天参加考试。","杰森可以跳过考试而且不用补考。"]},
+{a:2, o:["A. Come on time and you could be employed next time.","B. Be positive about people slamming doors in your face.","C. Cheer up and you would be able to get a job soon.","D. Keep your chin up and be proud of yourself."], t:["准时来，下次你可能就会被录用。","对当面摔门的人要保持积极态度。","振作起来，你很快就能找到工作。","抬起头来，为自己感到骄傲。"]},
+{a:3, o:["A. He had a worse driver in the back seat of his car.","B. He got very nervous when sitting behind the wheel.","C. He cannot drive the mother anywhere next next time.","D. He was criticized by the woman's mother all the way."], t:["他车后座上有一个更糟糕的司机。","他坐在方向盘后面时非常紧张。","他下次不能开车送这位母亲去任何地方。","他一路上都被女士的母亲批评。"]}
+],
+"Follow up - 第二套": [
+{a:3, o:["A. He is now a United States senator.","B. He has been an astronaut for 36 years.","C. He is the first American astronaut.","D. He was the oldest astronaut in space."], t:["他现在是美国参议员。","他当宇航员已经36年了。","他是第一位美国宇航员。","他是太空中年龄最大的宇航员。"]},
+{a:1, o:["A. To set a record.","B. To do research on how and why people get old.","C. To carry out a 9-day mission in space.","D. To find out how the aged keep healthy."], t:["为了创造纪录。","为了研究人如何以及为什么变老。","为了执行为期9天的太空任务。","为了了解老年人如何保持健康。"]},
+{a:2, o:["A. His trip sets a shining example for scientists to learn from.","B. His trip shows his new ambition after his retirement.","C. His trip implies what attitude the aged should take towards life.","D. His trip means that the aged could take trips in space."], t:["他的旅行为科学家树立了光辉的学习榜样。","他的旅行展示了他退休后的新抱负。","他的旅行暗示了老年人应该对生活采取什么态度。","他的旅行意味着老年人可以去太空旅行。"]},
+{a:1, o:["A. He always does the right things.","B. He likes drinking very much.","C. He does not like eating potato.","D. He enjoys exercising very much."], t:["他总是做正确的事。","他非常喜欢喝酒。","他不喜欢吃土豆。","他非常喜欢锻炼。"]},
+{a:0, o:["A. The significance of Mr. Glenn's shuttle trip into space.","B. The environment of an orbit around the Earth.","C. The record of being the oldest in space.","D. The example of a speeded-up version of the aging process."], t:["格伦先生乘航天飞机进入太空的意义。","地球轨道的环境。","太空中年龄最大的纪录。","加速版衰老过程的例子。"]}
+]
+},
+
+"Unit 6": {
+"Section A": [
+{a:0, o:["A. Tom is trying to study and work too much.","B. Tom is studying and working too hard.","C. Tom eats more food than he needs.","D. Tom has difficulty chewing food."], t:["汤姆试图学习和工作太多了。","汤姆学习和工作太拼命了。","汤姆吃得比他需要的多。","汤姆咀嚼食物有困难。"]},
+{a:1, o:["A. It's too bad that Liz and Doug cannot tolerate each other.","B. It's less likely for people to divorce if married at an older age.","C. It's better to get married when one gets old.","D. It's possible for one not to divorce when he gets old."], t:["莉兹和道格不能互相容忍真是太糟糕了。","年龄较大时结婚的人离婚的可能性较小。","老了再结婚更好。","人老了有可能不离婚。"]},
+{a:1, o:["A. He does not particularly like shoveling the walk.","B. He does not like his wife shoveling the walk.","C. He had a heart attack when shoveling the walk.","D. He did a smart thing to shovel the walk."], t:["他不是特别喜欢铲人行道上的雪。","他不喜欢妻子铲人行道上的雪。","他铲人行道上的雪时心脏病发作了。","他铲人行道上的雪做得很明智。"]},
+{a:1, o:["A. She will not tell anyone.","B. In time, the man will know if he and his classmate are compatible.","C. The man and his roommate will be compatible soon.","D. The man's roommate will learn to be neater in time."], t:["她不会告诉任何人。","随着时间的推移，男士会知道他和同学是否合得来。","男士和他的室友很快就会合得来。","男士的室友迟早会学会更整洁。"]},
+{a:3, o:["A. Their friends were lucky that the phone was near.","B. They should not have been afraid.","C. There was a robbery, and the man was close to them.","D. Something dangerous almost happened but didn't."], t:["他们的朋友很幸运电话就在附近。","他们不应该害怕。","发生了一起抢劫案，那个男人离他们很近。","危险的事情差点发生但没发生。"]},
+{a:1, o:["A. Jane walked home.","B. Jane was not caught in the rain.","C. Jane was caught in the rain.","D. It was raining when Jane came back on foot."], t:["简走回家了。","简没有淋雨。","简淋雨了。","简步行回来时正在下雨。"]},
+{a:3, o:["A. The pamphlets can be bought in hardware stores.","B. The pamphlets describe in detail how the property is damaged.","C. The pamphlets can help you find a lot of things when earth quaking.","D. The pamphlets are not often referred to by people."], t:["这些小册子可以在五金店买到。","这些小册子详细描述了财产是如何受损的。","这些小册子可以在地震时帮你找到很多东西。","这些小册子不常被人们参考。"]},
+{a:0, o:["A. They are less beneficial than jet engines or the Internet.","B. They are as important as jet engines or the Internet.","C. They've had the less positive effect on the lives of sick people.","D. They are medical miracles for sick people."], t:["它们不如喷气式发动机或互联网有益。","它们和喷气式发动机或互联网一样重要。","它们对病人生活的积极影响较小。","它们是病人的医学奇迹。"]},
+{a:2, o:["A. It is against the law to pump chemicals into the river.","B. Factories usually ignore the laws to protect the environment.","C. Companies hate to organize protest marches.","D. Publicity will exercise influence on companies."], t:["向河里排放化学物质是违法的。","工厂通常无视保护环境的法律。","公司讨厌组织抗议游行。","舆论会对公司产生影响。"]},
+{a:0, o:["A. Ways to improve the man's presentation.","B. Methods of predicting earthquakes.","C. The many new uses of computer graphics.","D. The preparation of the man's presentation."], t:["改进男士演讲的方法。","预测地震的方法。","计算机图形学的许多新用途。","男士演讲的准备。"]}
+],
+"Section B - Passage 1": [
+{a:0, o:["A. He didn't want to fulfill the assignment.","B. He enjoyed finishing mother's assignment.","C. He thought it worthwhile to do the job mother assigned.","D. He didn't take mother's assignment as worthwhile."], t:["他不想完成任务。","他喜欢完成母亲布置的任务。","他认为做母亲分配的工作是值得的。","他不认为母亲布置的任务值得做。"]},
+{a:3, o:["A. It was time-consuming to finish the jobs.","B. Mother appreciated the jobs he did.","C. He found he could do very good jobs himself.","D. It was self-rewarding to accomplish mother's tasks."], t:["完成这些工作很耗时。","母亲欣赏他做的工作。","他发现自己可以做得很好。","完成母亲的任务本身就是一种回报。"]},
+{a:2, o:["A. She feels she becomes much more capable.","B. She feels the same way as before.","C. She feels the joy from the work well done.","D. She feels looked down by people."], t:["她觉得自己变得更有能力了。","她和以前感觉一样。","她感受到了做好工作的喜悦。","她感到被人看不起。"]}
+],
+"Section B - Passage 2": [
+{a:2, o:["A. He could not walk steadily.","B. He was unable to find a perfect job.","C. He worked voluntarily at a children hospital.","D. He had to stay in hospital because of his fatal heart disease."], t:["他走路不稳。","他无法找到一份完美的工作。","他在一家儿童医院做志愿者。","他因为致命的心脏病不得不住院。"]},
+{a:3, o:["A. He wanted to show the girl his painting skills.","B. He would like to amuse the depressed girl.","C. He wanted to teach the girl how to paint this way.","D. He would like her to understand determination helps."], t:["他想向女孩展示他的绘画技巧。","他想逗那个沮丧的女孩开心。","他想教女孩如何这样画画。","他想让她明白决心是有帮助的。"]},
+{a:1, o:["A. Because the father taught her how to paint.","B. Because the father's love saved her from depression.","C. Because they were friends.","D. Because they helped each other when learning to walk."], t:["因为父亲教她画画。","因为父亲的爱把她从抑郁中拯救了出来。","因为他们是朋友。","因为他们学走路时互相帮助。"]}
+],
+"Follow up - 第一套": [
+{a:3, o:["A. How to turn off taps properly.","B. How to save water every day.","C. How to switch off light in the house.","D. How to protect water and trees in nature."], t:["如何正确关闭水龙头。","如何每天节约用水。","如何关掉家里的灯。","如何保护自然界中的水和树木。"]},
+{a:2, o:["A. It is a good idea to set up more wild animal preserves.","B. It is necessary to raise money through awareness campaigns.","C. It is a good idea for people to make voluntary contributions.","D. It is people's obligation to contribute money."], t:["建立更多野生动物保护区是个好主意。","有必要通过宣传活动筹集资金。","人们自愿捐款是个好主意。","捐款是人们的义务。"]},
+{a:1, o:["A. Louisiana tornado was as terrible as the one in Texas.","B. Louisiana tornado killed 50 people.","C. Louisiana tornado killed 200 people.","D. Louisiana tornado was much worse than the one in Texas."], t:["路易斯安那州的龙卷风和德克萨斯州的一样可怕。","路易斯安那州的龙卷风造成50人死亡。","路易斯安那州的龙卷风造成200人死亡。","路易斯安那州的龙卷风比德克萨斯州的严重得多。"]},
+{a:2, o:["A. He is doubtful about medical researches with animals.","B. He is in agreement with the woman not to use animals in research.","C. He feels it necessary to use animals in medical researches.","D. He feels in a dilemma whether to protect the environment or not."], t:["他对用动物做医学研究持怀疑态度。","他同意女士不在研究中使用动物。","他觉得在医学研究中使用动物是必要的。","他在是否保护环境方面感到两难。"]},
+{a:3, o:["A. The two speakers agree water pollution is the biggest environmental problem.","B. The two speakers think air pollution is the biggest environmental problem.","C. The two speakers always believe what is talked about in the news.","D. The two speakers have different opinions about the biggest pollution problem."], t:["两位说话者一致认为水污染是最大的环境问题。","两位说话者认为空气污染是最大的环境问题。","两位说话者总是相信新闻中谈论的内容。","两位说话者对最大的污染问题有不同的看法。"]}
+],
+"Follow up - 第二套": [
+{a:3, o:["A. There will be a lot of troubles to protect the environment.","B. It is not true that the environment is polluted.","C. People and industries can do nothing to help the environment.","D. Many things can be done to protect the environment."], t:["保护环境会有很多麻烦。","环境被污染了不是真的。","人和工业对帮助环境无能为力。","很多事情都可以做来保护环境。"]},
+{a:0, o:["A. Driving steadily will help protect the ozone layer.","B. It is necessary to drive to work at a steady speed.","C. Driving steadily will not cause global warming.","D. It is believed driving steadily can protect us from carbon monoxide."], t:["平稳驾驶有助于保护臭氧层。","有必要以稳定的速度开车上班。","平稳驾驶不会导致全球变暖。","人们认为平稳驾驶可以保护我们免受一氧化碳的危害。"]},
+{a:3, o:["A. Because they don't use disposable products.","B. Because they don't believe in disposable products.","C. Because they have enough disposable products.","D. Because they use much too many disposable products."], t:["因为他们不使用一次性产品。","因为他们不相信一次性产品。","因为他们有足够的一次性产品。","因为他们使用了太多一次性产品。"]},
+{a:2, o:["A. To follow a typical American family.","B. To cut the use of water in our daily life.","C. To buy a special 'low-flow' shower head.","D. To use as much water as people drink."], t:["跟随一个典型的美国家庭。","减少日常生活中的用水量。","买一个特殊的'低流量'淋浴喷头。","使用和人们饮水量一样多的水。"]},
+{a:1, o:["A. Things people can do to burn less gasoline.","B. Things people can do to reduce pollution.","C. Things people can do to prevent the forest from shrinking.","D. Things people can do to save water in our daily life."], t:["人们可以做的减少汽油消耗的事情。","人们可以做的减少污染的事情。","人们可以做的防止森林缩小的事情。","人们可以在日常生活中做的节约用水的事情。"]}
+]
+}
+};
+
+// ==================== FLATTEN & INDEX ====================
+let allQuestions = [];
+let qIndex = 0;
+
+Object.keys(BANK).forEach(unit => {
+    Object.keys(BANK[unit]).forEach(section => {
+        BANK[unit][section].forEach((q, i) => {
+            allQuestions.push({
+                id: qIndex++,
+                unit,
+                section,
+                num: i + 1,
+                answer: q.a,
+                options: q.o,
+                translations: q.t || []
+            });
+        });
+    });
+});
+
+// ==================== STATE ====================
+let currentMode = 'quiz'; // quiz | study
+let currentView = 'welcome'; // welcome | chapter | random | exam | stats | result
+let currentChapter = null;
+let examState = null;
+let examTimer = null;
+
+// Persistent stats
+let stats = loadStats();
+
+function loadStats() {
+    try {
+        const s = JSON.parse(localStorage.getItem('en_study_stats'));
+        if (s) return s;
+    } catch(e) {}
+    return { answered: {}, history: [] };
+}
+
+function saveStats() {
+    localStorage.setItem('en_study_stats', JSON.stringify(stats));
+}
+
+function recordAnswer(qId, isCorrect) {
+    stats.answered[qId] = { correct: isCorrect, time: Date.now() };
+    saveStats();
+    updateStatsBar();
+}
+
+function getStatsSummary() {
+    const keys = Object.keys(stats.answered);
+    const total = keys.length;
+    const correct = keys.filter(k => stats.answered[k].correct).length;
+    return { total, correct, rate: total > 0 ? Math.round(correct / total * 100) : 0 };
+}
+
+function getUnitStats(unit) {
+    const qs = allQuestions.filter(q => q.unit === unit);
+    const answered = qs.filter(q => stats.answered[q.id] !== undefined);
+    const correct = answered.filter(q => stats.answered[q.id].correct);
+    return { total: qs.length, answered: answered.length, correct: correct.length, rate: answered.length > 0 ? Math.round(correct.length / answered.length * 100) : 0 };
+}
+
+function getSectionType(section) {
+    if (section.startsWith('Section A')) return 'A';
+    if (section.startsWith('Section B')) return 'B';
+    return 'F';
+}
+
+// ==================== UI HELPERS ====================
+function updateStatsBar() {
+    const s = getStatsSummary();
+    document.getElementById('stat-answered').textContent = s.total;
+    document.getElementById('stat-correct').textContent = s.correct;
+    document.getElementById('stat-rate').textContent = s.rate + '%';
+}
+
+function setTopbar(title, subtitle) {
+    document.getElementById('topbar-title').textContent = title;
+    document.getElementById('topbar-subtitle').textContent = subtitle || '';
+}
+
+function setActiveNav(el) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (el) el.classList.add('active');
+}
+
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+// ==================== SIDEBAR ====================
+function initSidebar() {
+    const nav = document.getElementById('sidebar-nav');
+    nav.innerHTML = '';
+
+    Object.keys(BANK).forEach(unit => {
+        const group = document.createElement('div');
+        group.className = 'nav-group';
+
+        const header = document.createElement('div');
+        header.className = 'nav-group-header';
+        const totalQ = Object.values(BANK[unit]).reduce((s, arr) => s + arr.length, 0);
+        header.innerHTML = `<span>${unit}</span><span class="arrow">▼</span>`;
+
+        const items = document.createElement('div');
+        items.className = 'nav-group-items';
+
+        // Unit overview
+        const overviewItem = document.createElement('div');
+        overviewItem.className = 'nav-item';
+        overviewItem.innerHTML = `<span>全部题目</span><span class="count">${totalQ}</span>`;
+        overviewItem.onclick = () => { setActiveNav(overviewItem); loadChapter(unit, null); };
+        items.appendChild(overviewItem);
+
+        Object.keys(BANK[unit]).forEach(section => {
+            const item = document.createElement('div');
+            item.className = 'nav-item';
+            item.innerHTML = `<span>${section}</span><span class="count">${BANK[unit][section].length}</span>`;
+            item.onclick = () => { setActiveNav(item); loadChapter(unit, section); };
+            items.appendChild(item);
+        });
+
+        header.onclick = () => {
+            header.classList.toggle('collapsed');
+            items.style.display = header.classList.contains('collapsed') ? 'none' : 'block';
+        };
+
+        group.appendChild(header);
+        group.appendChild(items);
+        nav.appendChild(group);
+    });
+}
+
+// ==================== MODE TOGGLE ====================
+function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('mode-quiz').classList.toggle('active', mode === 'quiz');
+    document.getElementById('mode-study').classList.toggle('active', mode === 'study');
+    // Re-render current view
+    if (currentView === 'chapter' && currentChapter) {
+        loadChapter(currentChapter.unit, currentChapter.section);
+    }
+}
+
+// ==================== WELCOME PAGE ====================
+function showWelcome() {
+    currentView = 'welcome';
+    setTopbar('英语听力复习系统', '选择章节或开始练习');
+    setActiveNav(null);
+
+    const s = getStatsSummary();
+    const content = document.getElementById('content-area');
+    content.innerHTML = `
+        <div class="welcome">
+            <div class="welcome-icon">📖</div>
+            <h2>英语听力复习系统</h2>
+            <p>涵盖 6 个单元、${allQuestions.length} 道听力选择题。支持章节练习、随机抽题和模拟试卷三种模式，助你高效备考。</p>
+            <div class="welcome-cards">
+                <div class="welcome-card" onclick="startMockExam()">
+                    <div class="wc-icon">📝</div>
+                    <h3>模拟试卷</h3>
+                    <p>从各单元随机抽取 A/B/Follow Up 组成完整试卷，限时作答</p>
+                </div>
+                <div class="welcome-card" onclick="startRandomQuiz()">
+                    <div class="wc-icon">🎲</div>
+                    <h3>随机练习</h3>
+                    <p>随机抽取 10 道题目进行快速练习</p>
+                </div>
+                <div class="welcome-card" onclick="showStats()">
+                    <div class="wc-icon">📊</div>
+                    <h3>学习统计</h3>
+                    <p>查看各单元答题正确率和进度</p>
+                </div>
+            </div>
+            ${s.total > 0 ? `<div style="margin-top:28px;"><button class="reset-btn" style="padding:8px 20px;font-size:0.82rem;" onclick="resetAllStats()">清除所有答题记录 (${s.total}题)</button></div>` : ''}
+        </div>
+    `;
+}
+
+function resetAllStats() {
+    if (!confirm('确定要清除所有答题记录吗？此操作不可撤销。')) return;
+    stats = { answered: {}, history: [] };
+    saveStats();
+    updateStatsBar();
+    showWelcome();
+}
+
+// ==================== LOAD CHAPTER ====================
+function loadChapter(unit, section) {
+    currentView = 'chapter';
+    currentChapter = { unit, section };
+
+    let questions;
+    if (section) {
+        questions = allQuestions.filter(q => q.unit === unit && q.section === section);
+        setTopbar(`${unit} - ${section}`, `${questions.length} 道题目`);
+    } else {
+        questions = allQuestions.filter(q => q.unit === unit);
+        setTopbar(unit, `${questions.length} 道题目 · ${Object.keys(BANK[unit]).length} 个部分`);
+    }
+
+    renderQuiz(questions);
+
+    // Add chapter actions bar
+    const content = document.getElementById('content-area');
+    const answeredCount = questions.filter(q => stats.answered[q.id] !== undefined).length;
+    const correctCount = questions.filter(q => stats.answered[q.id] !== undefined && stats.answered[q.id].correct).length;
+    const actionBar = document.createElement('div');
+    actionBar.className = 'chapter-actions';
+    actionBar.innerHTML = `
+        <span class="ca-info">进度：<strong>${answeredCount}/${questions.length}</strong> · 正确：<strong>${correctCount}</strong>${answeredCount > 0 ? ` · 正确率：<strong>${Math.round(correctCount/answeredCount*100)}%</strong>` : ''}</span>
+        ${answeredCount > 0 ? `<button class="clear-progress-btn" onclick="clearUnitProgress('${unit}', ${section ? `'${section}'` : 'null'})">清空本${section ? '节' : '单元'}进度</button>` : ''}
+    `;
+    content.insertBefore(actionBar, content.firstChild);
+}
+
+function clearUnitProgress(unit, section) {
+    const scope = section || `整个 ${unit}`;
+    if (!confirm(`确定要清空 ${scope} 的答题记录吗？此操作不可撤销。`)) return;
+
+    let questions;
+    if (section) {
+        questions = allQuestions.filter(q => q.unit === unit && q.section === section);
+    } else {
+        questions = allQuestions.filter(q => q.unit === unit);
+    }
+
+    questions.forEach(q => { delete stats.answered[q.id]; });
+    saveStats();
+    updateStatsBar();
+
+    // Re-render
+    loadChapter(unit, section);
+}
+
+// ==================== RANDOM QUIZ ====================
+function startRandomQuiz() {
+    currentView = 'random';
+    currentChapter = null;
+    setActiveNav(null);
+    setTopbar('随机练习', '随机抽取 10 道题目');
+
+    const selected = shuffle(allQuestions).slice(0, 10);
+    renderQuiz(selected);
+}
+
+// ==================== RENDER QUIZ ====================
+function renderQuiz(questions) {
+    const content = document.getElementById('content-area');
+    const isStudy = currentMode === 'study';
+
+    let html = `<div class="${isStudy ? 'study-mode' : ''}">`;
+    questions.forEach((q, idx) => {
+        const answered = stats.answered[q.id];
+        const letters = ['A', 'B', 'C', 'D'];
+
+        html += `<div class="question-card" id="qcard-${q.id}">`;
+        html += `<div class="q-header">
+            <span style="display:flex;align-items:center;">
+                <span class="q-number">${idx + 1}</span>
+                <strong>Question ${idx + 1}</strong>
+            </span>
+            <span class="q-tag">${q.unit} · ${q.section}</span>
+        </div>`;
+        html += `<div class="q-body"><ul class="options-list" id="opts-${q.id}">`;
+
+        q.options.forEach((opt, oi) => {
+            let cls = 'option-item';
+            if (isStudy && oi === q.answer) cls += ' correct-answer';
+            if (answered !== undefined && !isStudy) {
+                cls += ' disabled';
+                if (oi === q.answer) cls += ' correct';
+                if (oi !== q.answer && answered && !answered.correct && stats.answered[q.id] && stats.answered[q.id].selectedIdx === oi) cls += ' wrong';
+            }
+
+            // Only show translation after answering or in study mode
+            const showTrans = (answered !== undefined) || isStudy;
+            const trans = (showTrans && q.translations && q.translations[oi]) ? `<span class="option-translation">${q.translations[oi]}</span>` : '';
+            html += `<li class="${cls}" data-qid="${q.id}" data-oi="${oi}" onclick="handleOptionClick(${q.id}, ${oi})">
+                <span class="option-letter">${letters[oi]}</span>
+                <span class="option-content">${opt}${trans}</span>
+            </li>`;
+        });
+
+        html += `</ul></div>`;
+
+        // Build translation list for feedback
+        const transList = q.translations && q.translations.length > 0
+            ? q.options.map((opt, oi) => `<div class="trans-line"><span class="trans-letter ${oi === q.answer ? 'trans-correct' : ''}">${letters[oi]}</span> ${opt} <span class="trans-zh">${q.translations[oi] || ''}</span></div>`).join('')
+            : '';
+
+        // Feedback area
+        if (answered !== undefined && !isStudy) {
+            const isCorrect = answered.correct;
+            html += `<div class="feedback-area show ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}">
+                <strong>${isCorrect ? '✅ 回答正确！' : '❌ 回答错误！'}</strong>
+                ${!isCorrect ? `<span> 正确答案：${letters[q.answer]}</span>` : ''}
+                ${transList ? `<div class="trans-list">${transList}</div>` : ''}
+            </div>`;
+        } else if (isStudy) {
+            html += `<div class="feedback-area show feedback-correct">
+                <strong>📖 学习模式</strong> · 正确答案：${letters[q.answer]}
+                ${transList ? `<div class="trans-list">${transList}</div>` : ''}
+            </div>`;
+        } else {
+            html += `<div class="feedback-area" id="fb-${q.id}"></div>`;
+        }
+
+        html += `</div>`;
+    });
+    html += `</div>`;
+
+    content.innerHTML = html;
+    content.scrollTop = 0;
+}
+
+// ==================== OPTION CLICK ====================
+function handleOptionClick(qId, optIdx) {
+    if (currentMode === 'study') return;
+    if (currentView === 'exam') {
+        handleExamOptionClick(qId, optIdx);
+        return;
+    }
+
+    const q = allQuestions.find(x => x.id === qId);
+    if (!q) return;
+    if (stats.answered[qId] !== undefined) return;
+
+    const isCorrect = optIdx === q.answer;
+    stats.answered[qId] = { correct: isCorrect, selectedIdx: optIdx, time: Date.now() };
+    saveStats();
+
+    const letters = ['A', 'B', 'C', 'D'];
+    const opts = document.querySelectorAll(`[data-qid="${qId}"]`);
+    opts.forEach(el => {
+        el.classList.add('disabled');
+        const oi = parseInt(el.dataset.oi);
+        if (oi === q.answer) el.classList.add('correct');
+        if (oi === optIdx && !isCorrect) el.classList.add('wrong');
+        // Add translation to option after answering
+        if (q.translations && q.translations[oi]) {
+            const contentEl = el.querySelector('.option-content');
+            if (contentEl && !contentEl.querySelector('.option-translation')) {
+                contentEl.insertAdjacentHTML('beforeend', `<span class="option-translation">${q.translations[oi]}</span>`);
+            }
+        }
+    });
+
+    const fb = document.getElementById(`fb-${qId}`);
+    if (fb) {
+        const transList = q.translations && q.translations.length > 0
+            ? q.options.map((opt, oi) => `<div class="trans-line"><span class="trans-letter ${oi === q.answer ? 'trans-correct' : ''}">${letters[oi]}</span> ${opt} <span class="trans-zh">${q.translations[oi] || ''}</span></div>`).join('')
+            : '';
+        fb.className = `feedback-area show ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`;
+        fb.innerHTML = `<strong>${isCorrect ? '✅ 回答正确！' : '❌ 回答错误！'}</strong>
+            ${!isCorrect ? `<span> 正确答案：${letters[q.answer]}</span>` : ''}
+            ${transList ? `<div class="trans-list">${transList}</div>` : ''}`;
+    }
+
+    updateStatsBar();
+}
+
+// ==================== MOCK EXAM ====================
+function startMockExam() {
+    currentView = 'exam';
+    currentChapter = null;
+    setActiveNav(null);
+
+    // Build exam: pick from each section type across all units
+    const sectionA = shuffle(allQuestions.filter(q => getSectionType(q.section) === 'A'));
+    const sectionB = shuffle(allQuestions.filter(q => getSectionType(q.section) === 'B'));
+    const followUp = shuffle(allQuestions.filter(q => getSectionType(q.section) === 'F'));
+
+    const examQuestions = [
+        ...sectionA.slice(0, 10),
+        ...sectionB.slice(0, 5),
+        ...followUp.slice(0, 5)
+    ];
+
+    examState = {
+        questions: examQuestions,
+        answers: {}, // qId -> selectedIdx
+        startTime: Date.now(),
+        duration: 20 * 60, // 20 minutes
+        submitted: false
+    };
+
+    setTopbar('模拟试卷', `${examQuestions.length} 道题目 · 限时 20 分钟`);
+    renderExam();
+    startExamTimer();
+}
+
+function startExamTimer() {
+    if (examTimer) clearInterval(examTimer);
+    examTimer = setInterval(() => {
+        if (!examState || examState.submitted) {
+            clearInterval(examTimer);
+            return;
+        }
+        const elapsed = Math.floor((Date.now() - examState.startTime) / 1000);
+        const remaining = Math.max(0, examState.duration - elapsed);
+        const timerEl = document.getElementById('exam-timer');
+        if (timerEl) {
+            const m = Math.floor(remaining / 60);
+            const s = remaining % 60;
+            timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            if (remaining <= 60) timerEl.style.color = '#FCA5A5';
+            else if (remaining <= 300) timerEl.style.color = '#FDE68A';
+        }
+        if (remaining <= 0) {
+            submitExam();
+        }
+    }, 1000);
+}
+
+function renderExam() {
+    const eq = examState.questions;
+    const letters = ['A', 'B', 'C', 'D'];
+    const content = document.getElementById('content-area');
+
+    let html = `
+        <div class="exam-header">
+            <div>
+                <h3>模拟试卷</h3>
+                <p>Section A × 10 · Section B × 5 · Follow Up × 5 · 共 ${eq.length} 题</p>
+            </div>
+            <div class="exam-timer" id="exam-timer">20:00</div>
+        </div>
+        <div class="exam-progress">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="exam-progress-bar" style="width:0%"></div></div>
+            <div class="progress-text">
+                <span id="exam-progress-text">已答 0 / ${eq.length}</span>
+                <span>限时 20 分钟</span>
+            </div>
+        </div>
+    `;
+
+    // Section A
+    const secA = eq.filter(q => getSectionType(q.section) === 'A');
+    const secB = eq.filter(q => getSectionType(q.section) === 'B');
+    const secF = eq.filter(q => getSectionType(q.section) === 'F');
+
+    html += `<div class="exam-section-title">Part I · Section A — 短对话 (${secA.length} 题)</div>`;
+    secA.forEach((q, i) => { html += renderExamQuestion(q, i + 1, letters); });
+
+    html += `<div class="exam-section-title">Part II · Section B — 篇章听力 (${secB.length} 题)</div>`;
+    secB.forEach((q, i) => { html += renderExamQuestion(q, secA.length + i + 1, letters); });
+
+    html += `<div class="exam-section-title">Part III · Follow Up — 综合理解 (${secF.length} 题)</div>`;
+    secF.forEach((q, i) => { html += renderExamQuestion(q, secA.length + secB.length + i + 1, letters); });
+
+    html += `
+        <div class="exam-submit-area">
+            <button class="submit-btn" onclick="submitExam()">交 卷</button>
+        </div>
+    `;
+
+    content.innerHTML = html;
+    content.scrollTop = 0;
+}
+
+function renderExamQuestion(q, num, letters) {
+    let html = `<div class="question-card" id="qcard-${q.id}">
+        <div class="q-header">
+            <span style="display:flex;align-items:center;">
+                <span class="q-number">${num}</span>
+                <strong>Question ${num}</strong>
+            </span>
+            <span class="q-tag">${q.unit} · ${q.section}</span>
+        </div>
+        <div class="q-body"><ul class="options-list" id="opts-${q.id}">`;
+
+    q.options.forEach((opt, oi) => {
+        const selected = examState.answers[q.id] === oi;
+        html += `<li class="option-item ${selected ? 'exam-selected' : ''}" data-qid="${q.id}" data-oi="${oi}" onclick="handleExamOptionClick(${q.id}, ${oi})">
+            <span class="option-letter">${letters[oi]}</span>
+            <span>${opt}</span>
+        </li>`;
+    });
+
+    html += `</ul></div></div>`;
+    return html;
+}
+
+function handleExamOptionClick(qId, optIdx) {
+    if (!examState || examState.submitted) return;
+    examState.answers[qId] = optIdx;
+
+    // Update UI
+    const opts = document.querySelectorAll(`[data-qid="${qId}"]`);
+    opts.forEach(el => {
+        const oi = parseInt(el.dataset.oi);
+        el.classList.toggle('exam-selected', oi === optIdx);
+    });
+
+    // Update progress
+    const answered = Object.keys(examState.answers).length;
+    const total = examState.questions.length;
+    const bar = document.getElementById('exam-progress-bar');
+    const text = document.getElementById('exam-progress-text');
+    if (bar) bar.style.width = (answered / total * 100) + '%';
+    if (text) text.textContent = `已答 ${answered} / ${total}`;
+}
+
+function submitExam() {
+    if (!examState || examState.submitted) return;
+    examState.submitted = true;
+    if (examTimer) clearInterval(examTimer);
+
+    const letters = ['A', 'B', 'C', 'D'];
+    let correct = 0;
+    const total = examState.questions.length;
+
+    examState.questions.forEach(q => {
+        const selected = examState.answers[q.id];
+        const isCorrect = selected === q.answer;
+
+        if (selected !== undefined) {
+            recordAnswer(q.id, isCorrect);
+        }
+
+        // Update card visual
+        const opts = document.querySelectorAll(`[data-qid="${q.id}"]`);
+        opts.forEach(el => {
+            el.classList.add('disabled');
+            el.classList.remove('exam-selected');
+            const oi = parseInt(el.dataset.oi);
+            if (oi === q.answer) el.classList.add('correct');
+            if (oi === selected && !isCorrect) el.classList.add('wrong');
+        });
+
+        if (isCorrect) correct++;
+
+        // Add feedback
+        const card = document.getElementById(`qcard-${q.id}`);
+        if (card) {
+            const transList = q.translations && q.translations.length > 0
+                ? q.options.map((opt, oi) => `<div class="trans-line"><span class="trans-letter ${oi === q.answer ? 'trans-correct' : ''}">${letters[oi]}</span> ${opt} <span class="trans-zh">${q.translations[oi] || ''}</span></div>`).join('')
+                : '';
+            const fb = document.createElement('div');
+            fb.className = `feedback-area show ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`;
+            if (selected === undefined) {
+                fb.className = 'feedback-area show feedback-wrong';
+                fb.innerHTML = `<strong>⚠️ 未作答</strong> · 正确答案：${letters[q.answer]}${transList ? `<div class="trans-list">${transList}</div>` : ''}`;
+            } else {
+                fb.innerHTML = `<strong>${isCorrect ? '✅ 正确' : '❌ 错误'}</strong>${!isCorrect ? ` · 正确答案：${letters[q.answer]}` : ''}${transList ? `<div class="trans-list">${transList}</div>` : ''}`;
+            }
+            card.appendChild(fb);
+        }
+    });
+
+    // Show result
+    const rate = Math.round(correct / total * 100);
+    const elapsed = Math.floor((Date.now() - examState.startTime) / 1000);
+    const timeStr = `${Math.floor(elapsed / 60)}分${elapsed % 60}秒`;
+
+    let scoreClass = 'poor';
+    if (rate >= 80) scoreClass = 'excellent';
+    else if (rate >= 60) scoreClass = 'good';
+
+    const resultHtml = `
+        <div class="result-page">
+            <div class="result-score ${scoreClass}">
+                <div class="score-num">${correct}/${total}</div>
+                <div class="score-label">正确率 ${rate}%</div>
+            </div>
+            <h2 style="margin-bottom:8px;">${rate >= 80 ? '🎉 表现优秀！' : rate >= 60 ? '👍 继续加油！' : '💪 需要更多练习'}</h2>
+            <p style="color:var(--text-secondary);margin-bottom:24px;">用时 ${timeStr}</p>
+            <div class="result-details">
+                <div class="result-detail-item">
+                    <div class="rd-value" style="color:var(--success)">${correct}</div>
+                    <div class="rd-label">正确</div>
+                </div>
+                <div class="result-detail-item">
+                    <div class="rd-value" style="color:var(--error)">${total - correct - (total - Object.keys(examState.answers).length)}</div>
+                    <div class="rd-label">错误</div>
+                </div>
+                <div class="result-detail-item">
+                    <div class="rd-value" style="color:var(--text-secondary)">${total - Object.keys(examState.answers).length}</div>
+                    <div class="rd-label">未答</div>
+                </div>
+                <div class="result-detail-item">
+                    <div class="rd-value" style="color:var(--primary)">${timeStr}</div>
+                    <div class="rd-label">用时</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <button class="action-btn primary" onclick="startMockExam()">再考一次</button>
+                <button class="action-btn secondary" onclick="showWelcome()">返回首页</button>
+            </div>
+        </div>
+    `;
+
+    // Insert result at top
+    const content = document.getElementById('content-area');
+    const resultDiv = document.createElement('div');
+    resultDiv.innerHTML = resultHtml;
+    content.insertBefore(resultDiv, content.firstChild);
+    content.scrollTop = 0;
+
+    updateStatsBar();
+}
+
+// ==================== STATISTICS ====================
+function showStats() {
+    currentView = 'stats';
+    currentChapter = null;
+    setActiveNav(null);
+    setTopbar('学习统计', '各单元答题情况');
+
+    const s = getStatsSummary();
+    const content = document.getElementById('content-area');
+
+    let html = `
+        <div class="stats-grid">
+            <div class="stats-card">
+                <h4>总答题数</h4>
+                <div class="sc-value">${s.total}</div>
+                <div class="sc-sub">共 ${allQuestions.length} 题</div>
+            </div>
+            <div class="stats-card">
+                <h4>正确数</h4>
+                <div class="sc-value" style="color:var(--success)">${s.correct}</div>
+                <div class="sc-sub">错误 ${s.total - s.correct} 题</div>
+            </div>
+            <div class="stats-card">
+                <h4>总正确率</h4>
+                <div class="sc-value" style="color:${s.rate >= 80 ? 'var(--success)' : s.rate >= 60 ? 'var(--primary)' : 'var(--error)'}">${s.rate}%</div>
+                <div class="sc-sub">${s.rate >= 80 ? '表现优秀' : s.rate >= 60 ? '继续加油' : '需要练习'}</div>
+            </div>
+        </div>
+
+        <div class="unit-stats-table">
+            <h3>各单元正确率</h3>
+    `;
+
+    Object.keys(BANK).forEach(unit => {
+        const us = getUnitStats(unit);
+        const barColor = us.rate >= 80 ? 'var(--success)' : us.rate >= 60 ? 'var(--primary)' : us.answered > 0 ? 'var(--error)' : '#CBD5E1';
+        html += `
+            <div class="ust-row">
+                <span class="ust-name">${unit}</span>
+                <span style="font-size:0.78rem;color:var(--text-secondary);width:80px;text-align:center;">${us.answered}/${us.total}</span>
+                <div class="ust-bar"><div class="ust-bar-fill" style="width:${us.answered > 0 ? us.rate : 0}%;background:${barColor}"></div></div>
+                <span class="ust-pct" style="color:${barColor}">${us.answered > 0 ? us.rate + '%' : '-'}</span>
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+
+    // Section type breakdown
+    const typeStats = { A: { total: 0, correct: 0, answered: 0 }, B: { total: 0, correct: 0, answered: 0 }, F: { total: 0, correct: 0, answered: 0 } };
+    allQuestions.forEach(q => {
+        const t = getSectionType(q.section);
+        typeStats[t].total++;
+        if (stats.answered[q.id] !== undefined) {
+            typeStats[t].answered++;
+            if (stats.answered[q.id].correct) typeStats[t].correct++;
+        }
+    });
+
+    html += `
+        <div class="unit-stats-table" style="margin-top:20px;">
+            <h3>题型正确率</h3>
+            <div class="ust-row">
+                <span class="ust-name">Section A · 短对话</span>
+                <span style="font-size:0.78rem;color:var(--text-secondary);width:80px;text-align:center;">${typeStats.A.answered}/${typeStats.A.total}</span>
+                <div class="ust-bar"><div class="ust-bar-fill" style="width:${typeStats.A.answered > 0 ? Math.round(typeStats.A.correct/typeStats.A.answered*100) : 0}%;background:var(--primary)"></div></div>
+                <span class="ust-pct" style="color:var(--primary)">${typeStats.A.answered > 0 ? Math.round(typeStats.A.correct/typeStats.A.answered*100) + '%' : '-'}</span>
+            </div>
+            <div class="ust-row">
+                <span class="ust-name">Section B · 篇章听力</span>
+                <span style="font-size:0.78rem;color:var(--text-secondary);width:80px;text-align:center;">${typeStats.B.answered}/${typeStats.B.total}</span>
+                <div class="ust-bar"><div class="ust-bar-fill" style="width:${typeStats.B.answered > 0 ? Math.round(typeStats.B.correct/typeStats.B.answered*100) : 0}%;background:var(--success)"></div></div>
+                <span class="ust-pct" style="color:var(--success)">${typeStats.B.answered > 0 ? Math.round(typeStats.B.correct/typeStats.B.answered*100) + '%' : '-'}</span>
+            </div>
+            <div class="ust-row">
+                <span class="ust-name">Follow Up · 综合理解</span>
+                <span style="font-size:0.78rem;color:var(--text-secondary);width:80px;text-align:center;">${typeStats.F.answered}/${typeStats.F.total}</span>
+                <div class="ust-bar"><div class="ust-bar-fill" style="width:${typeStats.F.answered > 0 ? Math.round(typeStats.F.correct/typeStats.F.answered*100) : 0}%;background:var(--warning)"></div></div>
+                <span class="ust-pct" style="color:#B45309">${typeStats.F.answered > 0 ? Math.round(typeStats.F.correct/typeStats.F.answered*100) + '%' : '-'}</span>
+            </div>
+        </div>
+    `;
+
+    content.innerHTML = html;
+}
+
+// ==================== INIT ====================
+window.onload = () => {
+    initSidebar();
+    updateStatsBar();
+    showWelcome();
+};
+</script>
+</body>
+</html>
