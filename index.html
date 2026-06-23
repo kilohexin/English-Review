@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英语听力复习系统</title>
+    <title>英语听力复习</title>
     <style>
         :root {
             --primary: #6366F1;
@@ -1585,7 +1585,7 @@ function showWelcome() {
     closeSidebar();
     clearExamState();
     currentView = 'welcome';
-    setTopbar('英语听力复习系统', '选择章节或开始练习');
+    setTopbar('英语听力复习', '选择章节或开始练习');
     setActiveNav(null);
 
     const s = getStatsSummary();
@@ -1593,7 +1593,7 @@ function showWelcome() {
     content.innerHTML = `
         <div class="welcome">
             <div class="welcome-icon">📖</div>
-            <h2>英语听力复习系统</h2>
+            <h2>英语听力复习</h2>
             <p>涵盖 6 个单元、${allQuestions.length} 道听力选择题 + 6 篇 Section C 填空。支持章节练习和模拟试卷两种模式，助你高效备考。</p>
             <div class="welcome-cards">
                 <div class="welcome-card" onclick="startMockExam()">
