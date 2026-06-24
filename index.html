@@ -1566,12 +1566,30 @@ function initSidebar() {
 
 // ==================== MODE TOGGLE ====================
 function setMode(mode) {
+    // Random quiz and exam only support quiz mode
+    if ((currentView === 'random' || currentView === 'exam') && mode === 'study') return;
     currentMode = mode;
     document.getElementById('mode-quiz').classList.toggle('active', mode === 'quiz');
     document.getElementById('mode-study').classList.toggle('active', mode === 'study');
     // Re-render current view
     if (currentView === 'chapter' && currentChapter) {
         loadChapter(currentChapter.unit, currentChapter.section);
+    }
+}
+
+function updateModeToggleState() {
+    const studyBtn = document.getElementById('mode-study');
+    if (currentView === 'random' || currentView === 'exam') {
+        studyBtn.style.opacity = '0.4';
+        studyBtn.style.pointerEvents = 'none';
+        if (currentMode === 'study') {
+            currentMode = 'quiz';
+            document.getElementById('mode-quiz').classList.add('active');
+            studyBtn.classList.remove('active');
+        }
+    } else {
+        studyBtn.style.opacity = '';
+        studyBtn.style.pointerEvents = '';
     }
 }
 
@@ -1587,6 +1605,7 @@ function showWelcome() {
     currentView = 'welcome';
     setTopbar('英语听力复习', '选择章节或开始练习');
     setActiveNav(null);
+    updateModeToggleState();
 
     const s = getStatsSummary();
     const content = document.getElementById('content-area');
@@ -1632,6 +1651,7 @@ function loadChapter(unit, section) {
     currentView = 'chapter';
     currentChapter = { unit, section };
     optionShuffleMap = {}; // no shuffling in chapter mode
+    updateModeToggleState();
 
     // Section C: render fill-in-the-blank view
     if (section && section.startsWith('Section C')) {
@@ -1865,6 +1885,7 @@ function startRandomQuiz() {
     currentView = 'random';
     currentChapter = null;
     setActiveNav(null);
+    updateModeToggleState();
     setTopbar('随机练习', '随机抽取 20 道题目');
 
     // Prefer questions not used last time
@@ -1919,22 +1940,29 @@ function renderQuiz(questions) {
 
         html += `</ul></div>`;
 
-        // Build translation list for feedback (always in original order)
-        const transList = q.translations && q.translations.length > 0
-            ? q.options.map((opt, oi) => `<div class="trans-line"><span class="trans-letter ${oi === q.answer ? 'trans-correct' : ''}">${letters[oi]}</span> ${stripOptPrefix(opt)} <span class="trans-zh">${q.translations[oi] || ''}</span></div>`).join('')
-            : '';
+        // Build translation list for feedback (follow shuffled order)
+        let transList = '';
+        if (q.translations && q.translations.length > 0) {
+            transList = order.map((origIdx, dispIdx) => {
+                return `<div class="trans-line"><span class="trans-letter ${origIdx === q.answer ? 'trans-correct' : ''}">${letters[dispIdx]}</span> ${stripOptPrefix(q.options[origIdx])} <span class="trans-zh">${q.translations[origIdx] || ''}</span></div>`;
+            }).join('');
+        }
+
+        // The display letter of the correct answer (follows shuffled order)
+        const correctDispIdx = order.indexOf(q.answer);
+        const correctLetter = letters[correctDispIdx];
 
         // Feedback area
         if (answered !== undefined && !isStudy) {
             const isCorrect = answered.correct;
             html += `<div class="feedback-area show ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}">
                 <strong>${isCorrect ? '✅ 回答正确！' : '❌ 回答错误！'}</strong>
-                ${!isCorrect ? `<span> 正确答案：${letters[q.answer]}</span>` : ''}
+                ${!isCorrect ? `<span> 正确答案：${correctLetter}</span>` : ''}
                 ${transList ? `<div class="trans-list">${transList}</div>` : ''}
             </div>`;
         } else if (isStudy) {
             html += `<div class="feedback-area show feedback-correct">
-                <strong>📖 学习模式</strong> · 正确答案：${letters[q.answer]}
+                <strong>📖 学习模式</strong> · 正确答案：${correctLetter}
                 ${transList ? `<div class="trans-list">${transList}</div>` : ''}
             </div>`;
         } else {
@@ -1983,12 +2011,18 @@ function handleOptionClick(qId, optIdx) {
 
     const fb = document.getElementById(`fb-${qId}`);
     if (fb) {
-        const transList = q.translations && q.translations.length > 0
-            ? q.options.map((opt, oi) => `<div class="trans-line"><span class="trans-letter ${oi === q.answer ? 'trans-correct' : ''}">${letters[oi]}</span> ${stripOptPrefix(opt)} <span class="trans-zh">${q.translations[oi] || ''}</span></div>`).join('')
-            : '';
+        const order = optionShuffleMap[qId] || [...Array(q.options.length).keys()];
+        let transList = '';
+        if (q.translations && q.translations.length > 0) {
+            transList = order.map((origIdx, dispIdx) => {
+                return `<div class="trans-line"><span class="trans-letter ${origIdx === q.answer ? 'trans-correct' : ''}">${letters[dispIdx]}</span> ${stripOptPrefix(q.options[origIdx])} <span class="trans-zh">${q.translations[origIdx] || ''}</span></div>`;
+            }).join('');
+        }
+        const correctDispIdx = order.indexOf(q.answer);
+        const correctLetter = letters[correctDispIdx];
         fb.className = `feedback-area show ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`;
         fb.innerHTML = `<strong>${isCorrect ? '✅ 回答正确！' : '❌ 回答错误！'}</strong>
-            ${!isCorrect ? `<span> 正确答案：${letters[q.answer]}</span>` : ''}
+            ${!isCorrect ? `<span> 正确答案：${correctLetter}</span>` : ''}
             ${transList ? `<div class="trans-list">${transList}</div>` : ''}`;
     }
 
@@ -2034,6 +2068,7 @@ function startMockExam() {
 
     const totalChoice = examQuestions.length;
     setTopbar('模拟试卷', `选择题 ${totalChoice} 题 + Section C 填空 · 限时 30 分钟`);
+    updateModeToggleState();
     renderExam();
     startExamTimer();
 }
@@ -2250,16 +2285,22 @@ function submitExam() {
         // Add feedback
         const card = document.getElementById(`qcard-${q.id}`);
         if (card) {
-            const transList = q.translations && q.translations.length > 0
-                ? q.options.map((opt, oi) => `<div class="trans-line"><span class="trans-letter ${oi === q.answer ? 'trans-correct' : ''}">${letters[oi]}</span> ${stripOptPrefix(opt)} <span class="trans-zh">${q.translations[oi] || ''}</span></div>`).join('')
-                : '';
+            const order = optionShuffleMap[q.id] || [...Array(q.options.length).keys()];
+            let transList = '';
+            if (q.translations && q.translations.length > 0) {
+                transList = order.map((origIdx, dispIdx) => {
+                    return `<div class="trans-line"><span class="trans-letter ${origIdx === q.answer ? 'trans-correct' : ''}">${letters[dispIdx]}</span> ${stripOptPrefix(q.options[origIdx])} <span class="trans-zh">${q.translations[origIdx] || ''}</span></div>`;
+                }).join('');
+            }
+            const correctDispIdx = order.indexOf(q.answer);
+            const correctLetter = letters[correctDispIdx];
             const fb = document.createElement('div');
             fb.className = `feedback-area show ${isCorrect ? 'feedback-correct' : 'feedback-wrong'}`;
             if (selected === undefined) {
                 fb.className = 'feedback-area show feedback-wrong';
-                fb.innerHTML = `<strong>⚠️ 未作答</strong> · 正确答案：${letters[q.answer]}${transList ? `<div class="trans-list">${transList}</div>` : ''}`;
+                fb.innerHTML = `<strong>⚠️ 未作答</strong> · 正确答案：${correctLetter}${transList ? `<div class="trans-list">${transList}</div>` : ''}`;
             } else {
-                fb.innerHTML = `<strong>${isCorrect ? '✅ 正确' : '❌ 错误'}</strong>${!isCorrect ? ` · 正确答案：${letters[q.answer]}` : ''}${transList ? `<div class="trans-list">${transList}</div>` : ''}`;
+                fb.innerHTML = `<strong>${isCorrect ? '✅ 正确' : '❌ 错误'}</strong>${!isCorrect ? ` · 正确答案：${correctLetter}` : ''}${transList ? `<div class="trans-list">${transList}</div>` : ''}`;
             }
             card.appendChild(fb);
         }
@@ -2324,6 +2365,7 @@ function showStats() {
     currentView = 'stats';
     currentChapter = null;
     setActiveNav(null);
+    updateModeToggleState();
     setTopbar('学习统计', '各单元答题情况');
 
     const s = getStatsSummary();
