@@ -390,7 +390,7 @@
             border: 1.5px solid var(--border);
             border-radius: var(--radius-sm);
             cursor: pointer;
-            transition: var(--transition);
+            transition: background 0.15s ease, border-color 0.15s ease;
             display: flex;
             align-items: flex-start;
             gap: 10px;
@@ -1991,7 +1991,6 @@ function handleOptionClick(qId, optIdx) {
 
     const isCorrect = optIdx === q.answer;
     stats.answered[qId] = { correct: isCorrect, selectedIdx: optIdx, time: Date.now() };
-    saveStats();
 
     const letters = ['A', 'B', 'C', 'D'];
     const opts = document.querySelectorAll(`[data-qid="${qId}"]`);
@@ -2026,8 +2025,12 @@ function handleOptionClick(qId, optIdx) {
             ${transList ? `<div class="trans-list">${transList}</div>` : ''}`;
     }
 
-    updateStatsBar();
-    updateChapterActions();
+    // Defer non-critical updates to avoid blocking UI
+    requestAnimationFrame(() => {
+        saveStats();
+        updateStatsBar();
+        updateChapterActions();
+    });
 }
 function startMockExam() {
     closeSidebar();
