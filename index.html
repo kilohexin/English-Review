@@ -944,6 +944,43 @@
             display: flex;
             gap: 8px;
             margin-bottom: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .sc-listen-bar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 10px 14px;
+            background: rgba(99, 102, 241, 0.06);
+            border-radius: var(--radius-sm);
+            flex-wrap: wrap;
+        }
+
+        .sc-listen-bar label {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .sc-listen-bar input[type="number"] {
+            width: 48px;
+            padding: 3px 6px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.82rem;
+            text-align: center;
+        }
+
+        .sc-listen-bar .listen-status {
+            font-size: 0.82rem;
+            color: var(--primary);
+            font-weight: 500;
+            margin-left: auto;
         }
 
         .sc-passage {
@@ -1414,6 +1451,7 @@ function clearExamState() {
     if (examTimer) { clearInterval(examTimer); examTimer = null; }
     if (examState && !examState.submitted) { examState.submitted = true; }
     examState = null;
+    stopListening();
 }
 
 // Persistent stats
@@ -1682,6 +1720,14 @@ function loadChapter(unit, section) {
                         <button class="action-btn secondary" style="font-size:0.78rem;padding:4px 12px;" onclick="revealAllBlanksUnit('${unit}')">显示全部答案</button>
                         <button class="action-btn warning" style="font-size:0.78rem;padding:4px 12px;" onclick="hideAllBlanksUnit('${unit}')">隐藏全部答案</button>
                     </div>
+                    <div class="sc-listen-bar">
+                        <button class="action-btn primary" style="font-size:0.78rem;padding:4px 12px;" onclick="startWordListeningUnit('${unit}')">单词听力练习</button>
+                        <button class="action-btn primary" style="font-size:0.78rem;padding:4px 12px;" onclick="startFullPassageUnit('${unit}')">阅读全篇测试</button>
+                        <button class="action-btn" style="font-size:0.78rem;padding:4px 12px;display:none;background:#ef4444;color:#fff;border:none;" id="listen-stop-btn" onclick="stopListening()">⏹ 停止</button>
+                        <label>间隔 <input type="number" id="listen-interval" value="3" min="1" max="10"> 秒</label>
+                        <label>语速 <input type="number" id="listen-rate" value="0.9" min="0.5" max="2" step="0.1"></label>
+                        <span class="listen-status" id="listen-status"></span>
+                    </div>
                     <div class="sc-passage">`;
                 const blanks = secCData.b || [];
                 const parts = secCData.p.split(/（(\d+)）/);
@@ -1760,6 +1806,7 @@ function renderSectionC(unit, section) {
 
     setTopbar(`${unit} - ${section}`, `填空题 · 点击空格查看答案`);
     const content = document.getElementById('content-area');
+    const blanks = data.b || [];
 
     // Replace （N） with clickable blanks
     let html = `<div class="section-c-card">
@@ -1767,10 +1814,17 @@ function renderSectionC(unit, section) {
             <button class="action-btn secondary" style="font-size:0.78rem;padding:4px 12px;" onclick="revealAllBlanks()">显示全部答案</button>
             <button class="action-btn warning" style="font-size:0.78rem;padding:4px 12px;" onclick="hideAllBlanks()">隐藏全部答案</button>
         </div>
+        <div class="sc-listen-bar">
+            <button class="action-btn primary" style="font-size:0.78rem;padding:4px 12px;" onclick="startWordListening()">单词听力练习</button>
+            <button class="action-btn primary" style="font-size:0.78rem;padding:4px 12px;" onclick="startFullPassage()">阅读全篇测试</button>
+            <button class="action-btn" style="font-size:0.78rem;padding:4px 12px;display:none;background:#ef4444;color:#fff;border:none;" id="listen-stop-btn" onclick="stopListening()">⏹ 停止</button>
+            <label>间隔 <input type="number" id="listen-interval" value="3" min="1" max="10"> 秒</label>
+            <label>语速 <input type="number" id="listen-rate" value="0.9" min="0.5" max="2" step="0.1"></label>
+            <span class="listen-status" id="listen-status"></span>
+        </div>
         <div class="sc-passage">`;
 
     const passage = data.p;
-    const blanks = data.b || [];
     let blankIdx = 0;
     const parts = passage.split(/（(\d+)）/);
 
@@ -1874,6 +1928,146 @@ function hideAllBlanksUnit(unit) {
             el.textContent = `(${i + 1})`;
         }
     });
+}
+
+// ==================== SECTION C LISTENING ====================
+let listenAbort = false;
+
+function getSectionCData() {
+    if (currentView === 'chapter' && currentChapter) {
+        if (currentChapter.section && currentChapter.section.startsWith('Section C')) {
+            return BANK[currentChapter.unit][currentChapter.section];
+        }
+        const secCKey = Object.keys(BANK[currentChapter.unit]).find(k => k.startsWith('Section C'));
+        return secCKey ? BANK[currentChapter.unit][secCKey] : null;
+    }
+    return null;
+}
+
+function getSectionCDataByUnit(unit) {
+    const secCKey = Object.keys(BANK[unit]).find(k => k.startsWith('Section C'));
+    return secCKey ? BANK[unit][secCKey] : null;
+}
+
+function speak(text, rate) {
+    return new Promise(resolve => {
+        if (!('speechSynthesis' in window) || listenAbort) { resolve(); return; }
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        u.rate = rate || 0.9;
+        u.onend = () => { if (listenAbort) speechSynthesis.cancel(); resolve(); };
+        u.onerror = resolve;
+        speechSynthesis.speak(u);
+    });
+}
+
+function abortableDelay(ms) {
+    return new Promise(resolve => {
+        const check = () => {
+            if (listenAbort) { resolve(); return; }
+            if (ms <= 0) { resolve(); return; }
+            const step = Math.min(ms, 200);
+            ms -= step;
+            setTimeout(check, step);
+        };
+        check();
+    });
+}
+
+function updateListenUI(playing) {
+    const stopBtn = document.getElementById('listen-stop-btn');
+    const status = document.getElementById('listen-status');
+    if (stopBtn) stopBtn.style.display = playing ? '' : 'none';
+    if (status && !playing) status.textContent = '';
+}
+
+async function startWordListening() {
+    stopListening(); // Stop any ongoing listening first
+    await new Promise(r => setTimeout(r, 100)); // Wait for cancellation
+    const data = getSectionCData();
+    if (!data || !data.b || data.b.length === 0) return;
+    listenAbort = false;
+    updateListenUI(true);
+    const interval = parseFloat(document.getElementById('listen-interval')?.value) || 3;
+    const rate = parseFloat(document.getElementById('listen-rate')?.value) || 0.9;
+    const status = document.getElementById('listen-status');
+    for (let i = 0; i < data.b.length; i++) {
+        if (listenAbort) break;
+        if (status) status.textContent = `${i + 1}/${data.b.length} ${data.b[i].w}`;
+        await speak(data.b[i].w, rate);
+        if (listenAbort) break;
+        if (i < data.b.length - 1) {
+            await abortableDelay(interval * 1000);
+        }
+    }
+    updateListenUI(false);
+}
+
+async function startWordListeningUnit(unit) {
+    stopListening();
+    await new Promise(r => setTimeout(r, 100));
+    const data = getSectionCDataByUnit(unit);
+    if (!data || !data.b || data.b.length === 0) return;
+    listenAbort = false;
+    updateListenUI(true);
+    const interval = parseFloat(document.getElementById('listen-interval')?.value) || 3;
+    const rate = parseFloat(document.getElementById('listen-rate')?.value) || 0.9;
+    const status = document.getElementById('listen-status');
+    for (let i = 0; i < data.b.length; i++) {
+        if (listenAbort) break;
+        if (status) status.textContent = `${i + 1}/${data.b.length} ${data.b[i].w}`;
+        await speak(data.b[i].w, rate);
+        if (listenAbort) break;
+        if (i < data.b.length - 1) {
+            await abortableDelay(interval * 1000);
+        }
+    }
+    updateListenUI(false);
+}
+
+async function startFullPassage() {
+    stopListening();
+    await new Promise(r => setTimeout(r, 100));
+    const data = getSectionCData();
+    if (!data || !data.p) return;
+    listenAbort = false;
+    updateListenUI(true);
+    const rate = parseFloat(document.getElementById('listen-rate')?.value) || 0.9;
+    const status = document.getElementById('listen-status');
+    if (status) status.textContent = '朗读中...';
+    // Replace blank markers with actual words for reading
+    const blanks = data.b || [];
+    const cleanText = data.p.replace(/（(\d+)）/g, (_, num) => {
+        const idx = parseInt(num) - 1;
+        return blanks[idx] ? blanks[idx].w : '';
+    });
+    await speak(cleanText, rate);
+    updateListenUI(false);
+}
+
+async function startFullPassageUnit(unit) {
+    stopListening();
+    await new Promise(r => setTimeout(r, 100));
+    const data = getSectionCDataByUnit(unit);
+    if (!data || !data.p) return;
+    listenAbort = false;
+    updateListenUI(true);
+    const rate = parseFloat(document.getElementById('listen-rate')?.value) || 0.9;
+    const status = document.getElementById('listen-status');
+    if (status) status.textContent = '朗读中...';
+    const blanks = data.b || [];
+    const cleanText = data.p.replace(/（(\d+)）/g, (_, num) => {
+        const idx = parseInt(num) - 1;
+        return blanks[idx] ? blanks[idx].w : '';
+    });
+    await speak(cleanText, rate);
+    updateListenUI(false);
+}
+
+function stopListening() {
+    listenAbort = true;
+    speechSynthesis.cancel();
+    updateListenUI(false);
 }
 
 // ==================== RANDOM QUIZ ====================
@@ -1985,6 +2179,8 @@ function handleOptionClick(qId, optIdx) {
 
     const q = allQuestions.find(x => x.id === qId);
     if (!q) return;
+    // In study mode, don't record answers
+    if (currentMode === 'study') return;
     // In random mode, allow re-answering even if previously answered in chapter mode
     const ignoreHistory = currentView === 'random';
     if (!ignoreHistory && stats.answered[qId] !== undefined) return;
@@ -2149,6 +2345,14 @@ function renderExam() {
                 <button class="action-btn secondary" style="font-size:0.78rem;padding:4px 12px;" onclick="examRevealAll()">显示全部答案</button>
                 <button class="action-btn warning" style="font-size:0.78rem;padding:4px 12px;" onclick="examHideAll()">隐藏全部答案</button>
             </div>
+            <div class="sc-listen-bar">
+                <button class="action-btn primary" style="font-size:0.78rem;padding:4px 12px;" onclick="startWordListeningExam()">单词听力练习</button>
+                <button class="action-btn primary" style="font-size:0.78rem;padding:4px 12px;" onclick="startFullPassageExam()">阅读全篇测试</button>
+                <button class="action-btn" style="font-size:0.78rem;padding:4px 12px;display:none;background:#ef4444;color:#fff;border:none;" id="listen-stop-btn" onclick="stopListening()">⏹ 停止</button>
+                <label>间隔 <input type="number" id="listen-interval" value="3" min="1" max="10"> 秒</label>
+                <label>语速 <input type="number" id="listen-rate" value="0.9" min="0.5" max="2" step="0.1"></label>
+                <span class="listen-status" id="listen-status"></span>
+            </div>
             <div class="sc-passage">`;
         const blanks = secCData.b || [];
         const parts = secCData.p.split(/（(\d+)）/);
@@ -2216,6 +2420,47 @@ function examHideAll() {
             el.textContent = `(${i + 1})`;
         }
     });
+}
+
+async function startWordListeningExam() {
+    stopListening();
+    await new Promise(r => setTimeout(r, 100));
+    if (!examState || !examState.sectionCData || !examState.sectionCData.b) return;
+    const data = examState.sectionCData;
+    listenAbort = false;
+    updateListenUI(true);
+    const interval = parseFloat(document.getElementById('listen-interval')?.value) || 3;
+    const rate = parseFloat(document.getElementById('listen-rate')?.value) || 0.9;
+    const status = document.getElementById('listen-status');
+    for (let i = 0; i < data.b.length; i++) {
+        if (listenAbort) break;
+        if (status) status.textContent = `${i + 1}/${data.b.length} ${data.b[i].w}`;
+        await speak(data.b[i].w, rate);
+        if (listenAbort) break;
+        if (i < data.b.length - 1) {
+            await new Promise(r => setTimeout(r, interval * 1000));
+        }
+    }
+    updateListenUI(false);
+}
+
+async function startFullPassageExam() {
+    stopListening();
+    await new Promise(r => setTimeout(r, 100));
+    if (!examState || !examState.sectionCData || !examState.sectionCData.p) return;
+    const data = examState.sectionCData;
+    listenAbort = false;
+    updateListenUI(true);
+    const rate = parseFloat(document.getElementById('listen-rate')?.value) || 0.9;
+    const status = document.getElementById('listen-status');
+    if (status) status.textContent = '朗读中...';
+    const blanks = data.b || [];
+    const cleanText = data.p.replace(/（(\d+)）/g, (_, num) => {
+        const idx = parseInt(num) - 1;
+        return blanks[idx] ? blanks[idx].w : '';
+    });
+    await speak(cleanText, rate);
+    updateListenUI(false);
 }
 
 function renderExamQuestion(q, num, letters) {
