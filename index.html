@@ -1433,8 +1433,6 @@ function saveStats() {
 
 function recordAnswer(qId, isCorrect, selectedIdx) {
     stats.answered[qId] = { correct: isCorrect, selectedIdx: selectedIdx, time: Date.now() };
-    saveStats();
-    updateStatsBar();
 }
 
 function getStatsSummary() {
@@ -1987,10 +1985,17 @@ function handleOptionClick(qId, optIdx) {
 
     const q = allQuestions.find(x => x.id === qId);
     if (!q) return;
-    if (stats.answered[qId] !== undefined) return;
+    // In random mode, allow re-answering even if previously answered in chapter mode
+    const ignoreHistory = currentView === 'random';
+    if (!ignoreHistory && stats.answered[qId] !== undefined) return;
 
     const isCorrect = optIdx === q.answer;
-    stats.answered[qId] = { correct: isCorrect, selectedIdx: optIdx, time: Date.now() };
+    // In random mode, don't overwrite existing chapter progress
+    if (ignoreHistory && stats.answered[qId] !== undefined) {
+        // Already answered in chapter mode, skip persisting but still show visual feedback
+    } else {
+        stats.answered[qId] = { correct: isCorrect, selectedIdx: optIdx, time: Date.now() };
+    }
 
     const letters = ['A', 'B', 'C', 'D'];
     const opts = document.querySelectorAll(`[data-qid="${qId}"]`);
@@ -2052,7 +2057,8 @@ function startMockExam() {
     const secAQuestions = allQuestions.filter(q => q.unit === unitForA && getSectionType(q.section) === 'A');
     const secBQuestions = allQuestions.filter(q => q.unit === unitForB && getSectionType(q.section) === 'B');
     const secFQuestions = allQuestions.filter(q => q.unit === unitForF && getSectionType(q.section) === 'F');
-    const secCData = BANK[unitForC]['Section C'];
+    const secCKey = Object.keys(BANK[unitForC]).find(k => k.startsWith('Section C'));
+    const secCData = secCKey ? BANK[unitForC][secCKey] : null;
 
     const examQuestions = [...secAQuestions, ...secBQuestions, ...secFQuestions];
 
@@ -2269,7 +2275,7 @@ function submitExam() {
         const selected = examState.answers[q.id];
         const isCorrect = selected === q.answer;
 
-        if (selected !== undefined) {
+        if (selected !== undefined && stats.answered[q.id] === undefined) {
             recordAnswer(q.id, isCorrect, selected);
         }
 
@@ -2308,6 +2314,10 @@ function submitExam() {
             card.appendChild(fb);
         }
     });
+
+    // Batch save all answers at once
+    saveStats();
+    updateStatsBar();
 
     // Show result
     const rate = Math.round(correct / total * 100);
